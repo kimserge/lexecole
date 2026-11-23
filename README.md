@@ -16,12 +16,13 @@ Pour un mot seul : tableau des terminaisons et article du dictionnaire de [LexEi
 - Latin : [Collatinus](https://github.com/biblissima/collatinus) (Yves Ouvrard, Philippe Verkerk), GPL — modèles de flexion, lemmes, traductions.
 - Allemand : [LanguageTool german-pos-dict](https://github.com/languagetool-org/german-pos-dict), CC BY-SA 4.0 — formes fléchies (`data/de.json`, sous la même licence).
 - Glossaire allemand–français LexEcôle (`build/de_fr_*.tsv`).
+- [FreeDict](https://freedict.org/) deu-fra et fra-deu 2025.11.23 (WikDict, données Wiktionary), CC BY-SA 3.0 — traductions allemand–français (`data/de/lem.json`).
 - Dictionnaires latins de LexEikôn (chargés depuis `/lexeikon/data/`) : Lebaigue–Quicherat, FreeDict Latein–Deutsch, Whitaker, Тананушко.
 
-`build/build_la.py` et `build/build_de.py` régénèrent `data/la.json` et `data/de.json`.
+`build/build_la.py` régénère `data/la.json`; `build/parse_fd.py`, `build/parse_fd2.py` et `build/build_de2.py` régénèrent `data/de/` (formes par fichiers de deux lettres).
 
 ## Licence
 
-Code : GPL-3.0 (voir `LICENSE`). `data/de.json` : CC BY-SA 4.0.
+Code : GPL-3.0 (voir `LICENSE`). `data/de/` : CC BY-SA.
 
 Sergey Kim

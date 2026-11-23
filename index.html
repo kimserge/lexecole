@@ -159,16 +159,17 @@ footer a{color:var(--mut)}
 <footer><div class="frow"><button class="upd" id="datb" data-i="src"></button><button class="upd" id="upd" data-i="upd"></button></div><ul class="datl hidden" id="datl">
 <li><a href="https://github.com/biblissima/collatinus">Collatinus</a> — Yves Ouvrard, Philippe Verkerk (GPL)</li>
 <li><a href="https://github.com/languagetool-org/german-pos-dict">LanguageTool, german-pos-dict</a> (CC BY-SA 4.0)</li>
+<li><a href="https://freedict.org/">FreeDict</a> Deutsch–français, français–Deutsch (WikDict, Wiktionary; CC BY-SA 3.0)</li>
 <li>Lebaigue, Quicherat, <i>Dictionnaire latin–français</i> — LexEikôn</li>
 <li>FreeDict Latein–Deutsch — LexEikôn (GPL)</li>
 <li>W. Whitaker, <i>Words</i> (Latin–English) — LexEikôn</li>
 <li>Тананушко, <i>Латинско-русский словарь</i> — LexEikôn</li>
-<li><span data-i="own"></span></li></ul><div>LexEcôle · Sergey Kim · v0.38</div></footer>
+<li><span data-i="own"></span></li></ul><div>LexEcôle · Sergey Kim · v0.40</div></footer>
 </div>
-<script src="fr.js?v=38"></script>
-<script src="la.js?v=38"></script>
-<script src="de.js?v=38"></script>
-<script src="cmp.js?v=38"></script>
+<script src="fr.js?v=40"></script>
+<script src="la.js?v=40"></script>
+<script src="de.js?v=40"></script>
+<script src="cmp.js?v=40"></script>
 <script>
 'use strict';
 const I18N={
@@ -199,7 +200,7 @@ function applyUI(){document.documentElement.lang=UI;$('#ui').value=UI;$('#taglin
   document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.l===LG));$('#bde').textContent=UI==='fr'?'Allemand':UI==='en'?'German':UI==='ru'?'Немецкий':'Deutsch';$('#bla').textContent=UI==='ru'?'Латынь':UI==='de'?'Latein':'Latin';
   renderLeg();if(typeof renderCars==='function')renderCars();if(toks.length)renderAna()}
 async function ensure(l){if(loaded[l])return loaded[l];$('#e1').textContent='';const st=$('#e1');st.className='load';st.textContent=t('loading');
-  loaded[l]=(async()=>{if(!FR._fem){const f=await (await fetch('frfem.txt',FRESH?{cache:'reload'}:{})).text();FR.setFem(f.split(/\s+/));FR._fem=true}const d=await (await fetch('data/'+l+'.json',FRESH?{cache:'reload'}:{})).json();ENG[l].load(d);st.textContent='';st.className='err';return true})();return loaded[l]}
+  loaded[l]=(async()=>{if(!FR._fem){const f=await (await fetch('frfem.txt',FRESH?{cache:'reload'}:{})).text();FR.setFem(f.split(/\s+/));FR._fem=true}const d=await (await fetch(l==='de'?'data/de/lem.json':'data/'+l+'.json',FRESH?{cache:'reload'}:{})).json();ENG[l].load(d);st.textContent='';st.className='err';return true})();return loaded[l]}
 function reset(from){if(from<=2){$('#c2').classList.add('hidden')}if(from<=3){$('#c3').classList.add('hidden')}$('#c4').classList.add('hidden')}
 $('.seg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.dataset.l===LG)return;LG=b.dataset.l;LS.set('lg',LG);toks=[];reset(2);applyUI();ensure(LG)});
 $('#ui').addEventListener('change',e=>{UI=e.target.value;LS.set('ui',UI);applyUI()});
@@ -211,8 +212,10 @@ $('#go').addEventListener('click',async()=>{const s=$('#src').value.trim(),e=$('
   if(!single&&!/[.!?]$/.test(s)){e.textContent=t('needDot');return}
   endP=single?'':s.slice(-1);
   await ensure(LG);const E=ENG[LG];
+  if(LG==='de')await DE.prefetch(ws.flatMap(w=>[w,w.toLowerCase(),w[0].toUpperCase()+w.slice(1)]),FRESH?{cache:'reload'}:{});
   toks=ws.map((w,i)=>{const r=E.analyze(w,i===0);return {w,i,a:r.a,enc:r.enc,sel:0}});
   E.choose(toks);toks.forEach(x=>{x.auto=x.c;x.order=orderAlts(x)});
+  if(LG==='de'&&single&&toks[0].c)await DE.prefetchLemma(toks[0].c.li);
   reset(3);renderAna();renderScene();$('#c2').classList.remove('hidden');$('#c2').scrollIntoView({behavior:'smooth',block:'start'})});
 function orderAlts(x){if(!x.a.length)return [];const seen=new Set(),out=[];const E=ENG[LG];
   for(const y of [x.c,...x.a.slice().sort((a,b)=>((b.base||0)+(b.bonus||0))-((a.base||0)+(a.bonus||0)))]){const L=E.label(y,UI,x.w).join('|');if(seen.has(L))continue;seen.add(L);out.push(y)}return out}

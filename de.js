@@ -2,7 +2,12 @@
 'use strict';
 const DE=(()=>{
 let D=null,F=null;
-let LEMS=null;function load(d){D=d;F=new Map(Object.entries(d.forms));LEMS=new Set(d.lemmas.map(l=>l[0]))}
+let LEMS=null,LIDX=null,BASE='data/de/';const FC=new Set(),PC=new Set(),PAR=new Map();
+function load(d){D=d;F=new Map();LEMS=new Set(d.lemmas.map(l=>l[0]));LIDX=new Map(d.lemmas.map((l,i)=>[l[0],i]))}
+function ckey(w){w=w.toLowerCase().slice(0,2);const m={'ä':'a1','ö':'o1','ü':'u1','ß':'s1'};let k=[...w].map(c=>m[c]||(c>='a'&&c<='z'?c:'_')).join('');return k.length<2?(k+'_').slice(0,2):k}
+async function getJ(u,o){try{const r=await fetch(u,o);return r.ok?await r.json():{}}catch(e){return {}}}
+async function prefetch(words,o){const ks=new Set();for(const w of words){if(!w)continue;ks.add(ckey(w))}await Promise.all([...ks].filter(k=>!FC.has(k)).map(async k=>{const j=await getJ(BASE+'f/'+k+'.json',o);FC.add(k);for(const [w,a] of Object.entries(j))F.set(w,a)}))}
+async function prefetchLemma(li,o){if(li==null||li<0)return;const k=ckey(D.lemmas[li][0]);if(PC.has(k))return;const j=await getJ(BASE+'p/'+k+'.json',o);PC.add(k);for(const [i,a] of Object.entries(j))PAR.set(+i,a.map(([w,t])=>[w,D.tags[t]]))}
 const CAS={NOM:'nom',AKK:'acc',DAT:'dat',GEN:'gen'},NUM={SIN:'s',PLU:'p'},GEN={MAS:'m',FEM:'f',NEU:'n'};
 function parse(tag){const p=tag.split(':'),f={tag,pos:p[0]};if(f.pos==='EIG'){f.pos='SUB';f.proper=true}
   for(const x of p){if(CAS[x])f.cas=CAS[x];else if(NUM[x])f.num=NUM[x];else if(GEN[x])f.gen=GEN[x];else if(/^[123]$/.test(x))f.pers=+x;
@@ -20,7 +25,7 @@ const possKey=w=>{const m=w.match(/^(mein|dein|sein|unser|euer|eur|ihr|Ihr)/i);r
 /* choose */
 function choose(toks){
   const n=toks.length;
-  toks.forEach(t=>{t.a.forEach(x=>{let s=0;const f=x.f;if(f.pos==='SUB')s+=1;if(f.pos==='VER'&&(f.pers||f.inf||f.pa2))s+=1;if(f.tense==='kj1')s-=2;if(f.tense==='kj2'&&!f.aux&&!f.mod)s-=1;if(f.imp)s-=1.5;if(f.pos==='ZUS')s-=1;if(x.gloss)s+=.5;if(f.pos==='PRO'&&f.sub==='DEM'&&toks[t.i+1]&&toks[t.i+1].a.some(y=>y.pos==='SUB'))s-=2;if(t.i===0&&f.pos==='ADV')s+=1.5;if(toks.length===1&&f.inf)s+=2;if(/^bitte$/i.test(t.w)&&f.pos==='ADV'&&t.i>0)s+=3;if(t.i===0&&/^sie$/i.test(t.w)&&f.cas==='nom')s+=3;const nx=toks[t.i+1];if(f.pos==='ZAL'&&nx&&nx.a.some(y=>y.pos==='SUB'))s+=3;if(f.pos==='ART'&&nx&&nx.a.some(y=>y.pos==='SUB'||y.pos==='ADJ'))s+=1.5;x.base=s})});
+  toks.forEach(t=>{t.a.forEach(x=>{let s=0;const f=x.f;if(f.pos==='SUB')s+=1;if(f.pos==='VER'&&(f.pers||f.inf||f.pa2))s+=1;if(f.tense==='kj1')s-=2;if(f.tense==='kj2'&&!f.aux&&!f.mod)s-=1;if(f.imp)s-=1.5;if(f.pos==='ZUS')s-=1;if(x.gloss)s+=.5;if(f.pos==='PRO'&&f.sub==='DEM'&&toks[t.i+1]&&toks[t.i+1].a.some(y=>y.pos==='SUB'))s-=2;if(t.i===0&&f.pos==='ADV')s+=1.5;if(toks.length===1&&f.inf)s+=2;if(t.i===0&&f.pos==='SUB'&&toks[1]&&toks[1].a.some(y=>y.pos==='VER'&&y.f.pers)&&!/^(ich|du|er|sie|es|wir|ihr|Sie|man)$/.test(toks[1].w)&&!t.a.some(y=>y.pos==='ADV'||y.pos==='PRO'||y.pos==='ART'))s+=2.5;if(t.i===0&&toks.length>1&&f.pos==='SUB'&&t.a.some(y=>y.pos==='VER'&&y.lem.toLowerCase()===x.lem.toLowerCase())&&(toks[1]&&/^(ich|du|er|sie|es|wir|ihr|Sie|man)$/.test(toks[1].w)||!toks.some((u,j)=>j>0&&u.a.some(y=>y.pos==='VER'&&y.f.pers))))s-=3;if(/^bitte$/i.test(t.w)&&f.pos==='ADV'&&t.i>0)s+=3;if(t.i===0&&/^sie$/i.test(t.w)&&f.cas==='nom')s+=3;const nx=toks[t.i+1];if(f.pos==='ZAL'&&nx&&nx.a.some(y=>y.pos==='SUB'))s+=3;if(f.pos==='ART'&&nx&&nx.a.some(y=>y.pos==='SUB'||y.pos==='ADJ'))s+=1.5;x.base=s})});
   const pick=t=>t.a.length?t.a.reduce((b,x)=>(x.base+(x.bonus||0)>b.base+(b.bonus||0)?x:b)):null;
   for(let it=0;it<3;it++){toks.forEach(t=>t.c=pick(t));
     const fin=toks.find(t=>t.c&&t.c.pos==='VER'&&t.c.f.pers);
@@ -90,8 +95,8 @@ function translate(toks,end){end=end||'.';VARS=[];NEGK=false;GERN=false;BITTE=fa
   else if(fin&&(fin.f.mod||/^(können|müssen|sollen|wollen|dürfen|mögen)$/.test(fin.lem))&&ifi>=0){modal=fin.lem;inf=toks[ifi].c;used.add(ifi)}
   else if(fin&&fin.f.tense==='prt'&&!/^(sein|haben)$/.test(fin.lem)&&!fin.f.mod)tense='pc';
   /* separable particle at the end */
-  const last=toks[n-1];if(fin&&last&&last.c&&last.c.pos==='ZUS'&&n-1!==fi){const comp=last.c.lem+vlem;const g=D.lemmas.find(L=>L[0]===comp);if(g){vlem=comp;used.add(n-1)}}
-  const vglossOf=l=>{if(l==='sein')return 'être';if(l==='haben')return 'avoir';if(l==='werden')return 'devenir';const L=D.lemmas.find(x=>x[0]===l);return firstSense(L?L[1]:l)||l};
+  const last=toks[n-1];if(fin&&last&&last.c&&last.c.pos==='ZUS'&&n-1!==fi){const comp=last.c.lem+vlem;const g=LIDX.has(comp);if(g){vlem=comp;used.add(n-1)}}
+  const vglossOf=l=>{if(l==='sein')return 'être';if(l==='haben')return 'avoir';if(l==='werden')return 'devenir';const L=D.lemmas[LIDX.get(l)];return firstSense(L?L[1]:l)||l};
   /* noun phrases */
   const NP=[];
   for(let i=0;i<n;i++){if(used.has(i))continue;const x=toks[i].c;if(!x)continue;
@@ -135,6 +140,7 @@ function translate(toks,end){end=end||'.';VARS=[];NEGK=false;GERN=false;BITTE=fa
       rest.push({i:np.i-1,txt:withPrep(pg,t.txt)});continue}
     if((np.cas==='nom'||np.head.f.proper&&!np.cas||np.head.f.proper&&np.cas!=='dat'&&np.cas!=='gen'&&(np.i<fi||whI>=0&&np.i>fi))&&!subj&&!pronSubj){if(np.head.f.proper){np.role='';}subj=npT(np);sG=subj.g;sN=subj.n}else if(np.cas==='nom'&&fin&&fin.lem==='sein'&&!pa2>=0)attr=t.txt;
     else if(np.cas==='dat')dats.push(withPrep('à',t.txt));else if(np.cas==='gen')rest.push({i:np.i,txt:withPrep('de',t.txt)});
+    else if(/^(Spaß|Angst|Hunger|Durst|Lust|Zeit)$/.test(toks[np.end].w)&&np.parts.length===1&&/^(machen|haben)$/.test(vlem)){objs.push(firstSense(np.head.gloss))}
     else if(/spielen$/.test(vlem)&&GAME.test(toks[np.end].w)){const g=firstSense(np.head.gloss);const mus=/^(Klavier|Gitarre)$/.test(toks[np.end].w);objs.push(withPrep(mus?'de':'à',FR.art(true,FR.genderOf(g,null),'s',g)+(FR.art(true,FR.genderOf(g,null),'s',g).endsWith("'")?'':' ')+g))}
     else objs.push(t.txt)}
   toks.forEach((t,i)=>{if(used.has(i))return;const x=t.c;if(!x){rest.push({i,txt:t.w});return}
@@ -177,7 +183,8 @@ function translate(toks,end){end=end||'.';VARS=[];NEGK=false;GERN=false;BITTE=fa
   if(AMBSIE&&VALT){const v2=[...front,VALT,...objs,...dats,...rest.map(r=>r.txt)].filter(Boolean).join(' ').replace(/\s+/g,' ').trim();VARS=[cap(s),cap(v2)]}
   return cap(s)}
 function expect(t){const x=t.c;if(!x)return [];const g=x.gloss||'';const a=g.split(/[,;]/).map(s=>s.replace(/\([^)]*\)/g,'').trim()).filter(Boolean);const gl=glossOf(x,t.w);return [...new Set([gl,...a].filter(Boolean))]}
-let BYL=null;function byLemma(){if(BYL)return BYL;BYL=new Map();for(const [w,a] of F)for(const [li,ti] of a){if(!BYL.has(li))BYL.set(li,[]);BYL.get(li).push([w,D.tags[ti]])}return BYL}
+function byLemma(){return PAR}
+const lcOK=(w,lem)=>!(/^[a-zäöü]/.test(lem)&&/^[A-ZÄÖÜ]/.test(w));
 const ART={m:{nom:'der',acc:'den',dat:'dem',gen:'des'},f:{nom:'die',acc:'die',dat:'der',gen:'der'},n:{nom:'das',acc:'das',dat:'dem',gen:'des'},p:{nom:'die',acc:'die',dat:'den',gen:'der'}};
 const THD={fr:{n:'nom',v:'verbe',m:'masc.',f:'fém.',n_:'neutre',pres:'présent',prt:'prétérit'},de:{n:'Nomen',v:'Verb',m:'mask.',f:'fem.',n_:'neutr.',pres:'Präsens',prt:'Präteritum'},en:{n:'noun',v:'verb',m:'masc.',f:'fem.',n_:'neut.',pres:'present',prt:'preterite'},ru:{n:'сущ.',v:'глагол',m:'м. р.',f:'ж. р.',n_:'ср. р.',pres:'наст.',prt:'претерит'}};
 function table(x,ui){if(!x||x.li<0)return null;const t=THD[ui]||THD.fr,L=byLemma().get(x.li)||[];const f=x.f;
@@ -185,16 +192,16 @@ function table(x,ui){if(!x||x.li<0)return null;const t=THD[ui]||THD.fr,L=byLemma
     const CS=['nom','acc','dat','gen'];return {title:t.n+' '+(g==='n'?t.n_:t[g]),rows:[['N','nom'],['Ac','acc'],['D','dat'],['G','gen']].map(([l,c])=>[l,get(c,'s'),get(c,'p')]),cols:['sg','pl'],cur:[CS.indexOf(f.cas),f.num==='p'?2:1]}}
   if(f.pos==='ADJ'||f.pos==='PA1'||f.pos==='PA2'){const ff=pr=>[...new Set(L.filter(([,tg])=>pr(parse(tg))).map(([w])=>w))];const pos=ff(q=>q.pos==='ADJ'&&q.prd&&!q.deg)[0]||x.lem,k=ff(q=>q.pos==='ADJ'&&q.prd&&q.deg==='comp')[0],sp=ff(q=>q.pos==='ADJ'&&q.deg==='sup');const lab={fr:['positif','comparatif','superlatif'],de:['Positiv','Komparativ','Superlativ'],en:['positive','comparative','superlative'],ru:['полож.','сравн.','превосх.']}[ui]||['positif','comparatif','superlatif'];const ttl={fr:'adjectif',de:'Adjektiv',en:'adjective',ru:'прил.'}[ui]||'adjectif';
     return {title:ttl,rows:[[lab[0],pos,''],[lab[1],k||'—',''],[lab[2],sp.length?'am '+(sp.find(w=>/sten$/.test(w))||sp[0]):'—','']],cols:['',''],one:true,cur:[f.deg==='comp'?1:f.deg==='sup'?2:0,1]}}
-  if(f.pos==='VER'&&f.inf){const tn='pres';const get=(p,n)=>{const w=[...new Set(L.filter(([,tg])=>{const q=parse(tg);return q.pos==='VER'&&q.pers===p&&q.num===n&&q.tense===tn&&!q.aux&&!q.mod||q.pos==='VER'&&q.pers===p&&q.num===n&&q.tense===tn}).map(([w])=>w))];return w.length?w.slice(0,2).join(', '):'—'};
+  if(f.pos==='VER'&&f.inf){const tn='pres';const get=(p,n)=>{const w=[...new Set(L.filter(([ww,tg])=>{const q=parse(tg);return lcOK(ww,x.lem)&&q.pos==='VER'&&q.pers===p&&q.num===n&&q.tense===tn}).map(([w])=>w))];return w.length?w.slice(0,2).join(', '):'—'};
     return {title:t.v+' · '+t[tn],rows:[1,2,3].map(p=>[String(p),get(p,'s'),get(p,'p')]),cols:['sg','pl'],cur:null}}
-  if(f.pos==='VER'&&f.pers){const tn=f.tense==='prt'?'prt':'pres';const get=(p,n)=>{const w=[...new Set(L.filter(([,tg])=>{const q=parse(tg);return q.pos==='VER'&&q.pers===p&&q.num===n&&q.tense===tn}).map(([w])=>w))];return w.length?w.join(', '):'—'};
+  if(f.pos==='VER'&&f.pers){const tn=f.tense==='prt'?'prt':'pres';const get=(p,n)=>{const w=[...new Set(L.filter(([ww,tg])=>{const q=parse(tg);return lcOK(ww,x.lem)&&q.pos==='VER'&&q.pers===p&&q.num===n&&q.tense===tn}).map(([w])=>w))];return w.length?w.join(', '):'—'};
     return {title:t.v+' · '+t[tn],rows:[1,2,3].map(p=>[String(p),get(p,'s'),get(p,'p')]),cols:['sg','pl'],cur:[f.pers-1,f.num==='p'?2:1]}}
   return null}
-function entry(x){if(!x||x.li<0)return null;const L=byLemma().get(x.li)||[];const f=x.f;const ff=pr=>[...new Set(L.filter(([,tg])=>pr(parse(tg))).map(([w])=>w))];
+function entry(x){if(!x||x.li<0)return null;const L=byLemma().get(x.li)||[];const f=x.f;const ff=pr=>[...new Set(L.filter(([w,tg])=>lcOK(w,x.lem)&&pr(parse(tg))).map(([w])=>w))];
   const senses=(x.gloss||'').split(/[,;]/).map(z=>z.trim()).filter(Boolean);let hw=x.lem,info='';
   if(f.pos==='SUB'){const g=f.gen||(parse((L.find(([,tg])=>/^SUB/.test(tg))||['','SUB'])[1]).gen);hw=({m:'der',f:'die',n:'das'}[g]||'')+' '+x.lem;const gs=ff(q=>q.pos==='SUB'&&q.cas==='gen'&&q.num==='s'),pl=ff(q=>q.pos==='SUB'&&q.cas==='nom'&&q.num==='p');info=[gs.length?(g==='f'?'der ':'des ')+gs.filter(w=>/es$/.test(w)||gs.length===1).slice(0,1).join(''):'',pl.length?'die '+pl[0]:''].filter(Boolean).join(' · ')}
   else if(f.pos==='VER'){const prt=ff(q=>q.pos==='VER'&&q.pers===3&&q.num==='s'&&q.tense==='prt'),pa2=ff(q=>q.pos==='VER'&&q.pa2),p3=ff(q=>q.pos==='VER'&&q.pers===3&&q.num==='s'&&q.tense==='pres');info=[p3[0],prt[0],pa2[0]].filter(Boolean).join(' · ')}
   else if(f.pos==='ADJ'){const k=ff(q=>q.pos==='ADJ'&&q.prd&&q.deg==='comp'),sp=ff(q=>q.pos==='ADJ'&&q.deg==='sup');info=[k[0],sp.length?'am '+(sp.find(w=>/sten$/.test(w))||sp[0]):''].filter(Boolean).join(' · ')}
   return {hw,info,senses}}
-return {entry,variants:()=>VARS,load,table,analyze,choose,label,translate,expect}})();
+return {prefetch,prefetchLemma,entry,variants:()=>VARS,load,table,analyze,choose,label,translate,expect}})();
 if(typeof module!=='undefined')module.exports=DE;

@@ -111,7 +111,7 @@ footer a{color:var(--mut)}
 
 <section class="card" id="c1">
   <h2><b>1</b><span data-i="t1"></span></h2>
-  <textarea id="src" spellcheck="false" autocapitalize="sentences" autocomplete="off"></textarea>
+  <textarea id="src" enterkeyhint="go" spellcheck="false" autocapitalize="sentences" autocomplete="off"></textarea>
   <div class="hint" data-i="h1"></div>
   <div class="err" id="e1"></div>
   <div class="row"><button class="btn" id="go" data-i="go"></button></div>
@@ -127,7 +127,7 @@ footer a{color:var(--mut)}
 
 <section class="card hidden" id="c3">
   <h2><b>3</b><span data-i="t3"></span></h2>
-  <textarea id="usr" autocomplete="off"></textarea>
+  <textarea id="usr" enterkeyhint="done" autocomplete="off"></textarea>
   <div class="err" id="e3"></div>
   <div class="row"><button class="btn" id="cmpb" data-i="cmp"></button></div>
 </section>
@@ -147,7 +147,7 @@ footer a{color:var(--mut)}
 <li>W. Whitaker, <i>Words</i> (Latin–English) — LexEikôn</li>
 <li>Тананушко, <i>Латинско-русский словарь</i> — LexEikôn</li>
 <li><span data-i="own"></span></li></ul></details>
-<div><button class="upd" id="upd" data-i="upd"></button></div><div>LexEcôle · Sergey Kim · v0.15</div></footer>
+<div><button class="upd" id="upd" data-i="upd"></button></div><div>LexEcôle · Sergey Kim · v0.16</div></footer>
 </div>
 <script src="fr.js"></script>
 <script src="la.js"></script>
@@ -243,7 +243,8 @@ function doCompare(){const u=$('#usr').value.trim(),e=$('#e3');e.textContent='';
 $('#cmpb').addEventListener('click',doCompare);
 $('#upd').addEventListener('click',async()=>{try{if(window.caches){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}}catch(e){}location.replace(location.pathname+'?u='+Date.now())});
 if(/[?&]u=/.test(location.search))try{history.replaceState(null,'',location.pathname)}catch(e){}
-$('#src').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#go').click()}});
+$('#src').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('#go').click()}});
+$('#usr').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('#cmpb').click()}});
 applyUI();ensure(LG);
 </script>
 </body>

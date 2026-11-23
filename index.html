@@ -72,6 +72,7 @@ textarea:focus{outline:2px solid rgba(29,58,158,.2);border-color:var(--acc)}
 table.cmp{border-collapse:separate;border-spacing:8px 0;margin:0 0 14px -8px}
 table.cmp td{text-align:center;vertical-align:bottom;white-space:nowrap;padding:0}
 table.cmp td.lab{width:24px;padding:0;vertical-align:middle;border-right:1px solid var(--line)}
+table.cmp td.lab.carl{width:86px;vertical-align:middle;padding-right:4px}
 table.cmp td.lab div{writing-mode:vertical-rl;transform:rotate(180deg);font:600 9px/1.1 var(--sans);letter-spacing:.06em;color:var(--mut);white-space:normal;width:22px;height:76px;display:flex;align-items:center;justify-content:center;text-align:center;margin:0 auto}
 .cmp .src{font:italic 18px/1.2 var(--serif);color:var(--lap)}
 .cmp .ar{font:14px/1 var(--sans);color:#b9b2a5;height:16px}
@@ -147,7 +148,7 @@ footer a{color:var(--mut)}
 <li>W. Whitaker, <i>Words</i> (Latin–English) — LexEikôn</li>
 <li>Тананушко, <i>Латинско-русский словарь</i> — LexEikôn</li>
 <li><span data-i="own"></span></li></ul></details>
-<div><button class="upd" id="upd" data-i="upd"></button></div><div>LexEcôle · Sergey Kim · v0.16</div></footer>
+<div><button class="upd" id="upd" data-i="upd"></button></div><div>LexEcôle · Sergey Kim · v0.17</div></footer>
 </div>
 <script src="fr.js"></script>
 <script src="la.js"></script>
@@ -228,13 +229,30 @@ function renderAna(){const A=$('#ana'),al=$('#alts');
   if(false){al.classList.remove('hidden');al.innerHTML=toks[0].order.map(y=>`<li><b>${esc(toks[0].w)}</b>${lab(toks[0],y).replace(/<br>/g,' · ')}</li>`).join('')}else{al.classList.add('hidden');al.innerHTML=''}
   $('#chk').parentElement.classList.toggle('hidden',single);renderDic();renderTb()}
 $('#chk').addEventListener('click',()=>{$('#c3').classList.remove('hidden');$('#usr').focus();$('#c3').scrollIntoView({behavior:'smooth',block:'start'})});
+/* cars for the German correction: pupil's car (L) and LexEcôle's car */
+function carSVG(o){const n=o.err||0,sh=!n,uid='c'+Math.random().toString(36).slice(2,7);
+  const body=n>=6?'#4a5a8f':'#1d3a9e';
+  const wheel=(x,flat)=>flat?`<ellipse cx="${x}" cy="41.5" rx="9.5" ry="4.5" fill="#222"/><ellipse cx="${x}" cy="41.5" rx="4" ry="2" fill="#999"/><path d="M${x-9} 43 q4 2 9 0 q5 2 9 0" stroke="#111" stroke-width="1.4" fill="none"/>`:`<circle cx="${x}" cy="38" r="8" fill="#222"/><circle cx="${x}" cy="38" r="3.6" fill="#c9ced8"/><circle cx="${x}" cy="38" r="1.2" fill="#555"/>`;
+  const lamp=(y,broken)=>broken?`<rect x="81" y="${y}" width="5" height="4" rx="1" fill="#555"/><path d="M81 ${y} l5 4 M86 ${y} l-5 4" stroke="#ddd" stroke-width=".8"/>`:`<rect x="81" y="${y}" width="5" height="4" rx="1" fill="#ffd54a"/>${sh?`<path d="M86 ${y+2} l7 -2 M86 ${y+2} l7 2" stroke="#ffd54a" stroke-width=".8" opacity=".8"/>`:''}`;
+  const sign=o.label==='LexEcôle'?`<text x="44" y="29" text-anchor="middle" font-family="Georgia,serif" font-size="8" font-style="italic" font-weight="700" fill="#fff">LexEcôle</text>`:`<rect x="38" y="20" width="12" height="12" rx="1.5" fill="#fff" stroke="#13265c" stroke-width=".8"/><text x="44" y="30" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="700" fill="#1d3a9e">${o.label}</text>`;
+  return `<svg class="car" viewBox="0 0 96 48" width="84" height="42" aria-label="${o.label}"><defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sh?'#5a78d8':body}"/><stop offset=".55" stop-color="${body}"/><stop offset="1" stop-color="#13265c"/></linearGradient></defs>
+  ${n>=6?'<g fill="#9aa0aa" opacity=".7"><circle cx="86" cy="12" r="4"/><circle cx="91" cy="6" r="3"/><circle cx="82" cy="5" r="2.5"/></g>':''}
+  <path d="M4 35 L4 27 Q5 21 12 20 L24 19 L33 10 Q35 8 40 8 L58 8 Q62 8 65 11 L74 19 Q83 20 86 26 L86 35 Z" fill="url(#${uid})" stroke="#0d1c47" stroke-width=".8"/>
+  <path d="M35 11 L28 19 L43 19 L43 11 Z M47 11 L47 19 L68 19 L61 11 Z" fill="${sh?'#cfe0ff':'#b7c3d9'}"/>
+  ${n>=5?'<path d="M50 12 l5 4 l-3 2 l6 1 M55 16 l4 -3" stroke="#fff" stroke-width=".7" fill="none"/>':''}
+  ${n>=6?'<path d="M14 26 q4 3 8 0" stroke="#0d1c47" stroke-width="1" fill="none"/>':''}
+  ${sign}
+  ${lamp(22,n>=3)}${lamp(28,n>=4)}<rect x="3" y="24" width="3" height="4" fill="#d33"/>
+  ${wheel(22,n>=2)}${wheel(68,n>=1)}
+  ${sh?'<path d="M14 23 L30 21" stroke="#fff" stroke-width="1.5" opacity=".55" stroke-linecap="round"/><g fill="#fff6c2"><path d="M40 2 l1 3 l3 1 l-3 1 l-1 3 l-1 -3 l-3 -1 l3 -1z"/><path d="M76 13 l.7 2 l2 .7 l-2 .7 l-.7 2 l-.7 -2 l-2 -.7 l2 -.7z"/><path d="M10 15 l.6 1.6 l1.6 .6 l-1.6 .6 l-.6 1.6 l-.6 -1.6 l-1.6 -.6 l1.6 -.6z"/></g>':''}
+  </svg>`}
 function doCompare(){const u=$('#usr').value.trim(),e=$('#e3');e.textContent='';if(!u){e.textContent=t('emptyU');return}
   const E=ENG[LG];const prog=E.translate(toks,endP);
   const src=toks.filter(x=>x.c).map(x=>({w:x.w,label:E.label(x.c,UI,x.w),exp:E.expect(x),kind:x.c.pos}));
   const r=CMP.compare(u,prog,src,UI,LG==='la');
   $('#score').className='score '+(r.errors?'bad':'good');$('#score').textContent=r.errors?t('nErr')(r.errors):t('allOk');
-  $('#c4').classList.remove('hidden');const C=r.cols;const box=$('#cmp');
-  const tbl=cs=>{const row=f=>cs.map(f).join('');return `<table class="cmp"><tr><td class="lab"></td>${row(c=>`<td class="src">${c.src?esc(c.src):''}</td>`)}</tr><tr><td class="lab"></td>${row(c=>`<td class="ar">${c.src?'↓':''}</td>`)}</tr><tr><td class="lab" rowspan="2"><div>${esc(t('yours'))}</div></td>${row(c=>`<td class="${c.ok?'ok':''}"><div class="fx">${c.ok?'✓':c.fix?esc(c.fix):''}</div><div class="why">${!c.ok&&c.why?esc(c.why):''}</div></td>`)}</tr><tr>${row(c=>`<td class="u ${c.ok?'':c.missing?'miss':c.extra?'bad extra':'bad'}">${c.u?esc(c.u):(c.missing?'‸':'')}</td>`)}</tr><tr><td class="lab"><div>${esc(t('mine'))}</div></td>${row(c=>`<td class="pg">${c.p?esc(c.p):''}</td>`)}</tr></table>`};
+  $('#c4').classList.remove('hidden');const C=r.cols;const box=$('#cmp');const CAR=LG==='de';
+  const tbl=cs=>{const row=f=>cs.map(f).join('');return `<table class="cmp"><tr><td class="lab"></td>${row(c=>`<td class="src">${c.src?esc(c.src):''}</td>`)}</tr><tr><td class="lab"></td>${row(c=>`<td class="ar">${c.src?'↓':''}</td>`)}</tr><tr><td class="lab${CAR?' carl':''}" rowspan="2">${CAR?carSVG({label:UI==='ru'?'У':'L',err:r.errors}):`<div>${esc(t('yours'))}</div>`}</td>${row(c=>`<td class="${c.ok?'ok':''}"><div class="fx">${c.ok?'✓':c.fix?esc(c.fix):''}</div><div class="why">${!c.ok&&c.why?esc(c.why):''}</div></td>`)}</tr><tr>${row(c=>`<td class="u ${c.ok?'':c.missing?'miss':c.extra?'bad extra':'bad'}">${c.u?esc(c.u):(c.missing?'‸':'')}</td>`)}</tr><tr><td class="lab${CAR?' carl':''}">${CAR?carSVG({label:'LexEcôle',err:0}):`<div>${esc(t('mine'))}</div>`}</td>${row(c=>`<td class="pg">${c.p?esc(c.p):''}</td>`)}</tr></table>`};
   box.innerHTML=tbl(C);
   {const T=box.querySelector('table'),W=box.clientWidth,cells=[...T.rows[3].cells],lw=T.rows[0].cells[0].offsetWidth+10;const ws=C.map((c,k)=>Math.max(cells[k].offsetWidth,T.rows[0].cells[k+1].offsetWidth,T.rows[2].cells[k+1].offsetWidth,T.rows[4].cells[k+1].offsetWidth)+10);
    const groups=[];let cur=[],acc=lw;C.forEach((c,k)=>{if(cur.length&&acc+ws[k]>W){groups.push(cur);cur=[];acc=lw}cur.push(c);acc+=ws[k]});if(cur.length)groups.push(cur);

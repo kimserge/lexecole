@@ -61,7 +61,7 @@ function choose(toks){
       if(prev&&prev.pos==='prep'){const pc=PREP_CASE(prev.L[2]);if(pc&&F.cas&&pc.split('|').includes(F.cas))b+=4;else if(F.cas)b-=1}
       if(x.pos==='prep'&&toks[i+1]){const pc=PREP_CASE(x.L[2]);if(pc&&toks[i+1].a.some(y=>pc.split('|').includes(y.f.cas)))b+=2}
       if(vb&&F.cas==='nom'&&vb.f.pers===3&&F.num===vb.f.num)b+=1.5;
-      if(F.cas==='acc')b+=0.6;if(F.cas==='dat'&&vb&&/^(do|dico|narro|mitto|ostendo|credo|pareo|impero|persuadeo|faueo|noceo|placeo|respondeo|scribo|monstro|trado|praebeo|dono|nuntio|promitto|reddo)$/.test(norm(vb.lem)))b+=1.2;if(F.cas==='gen'||F.cas==='dat')b-=0.2;
+      if(F.cas==='acc')b+=0.6;if(vb&&norm(vb.lem)==='sum'&&F.cas==='nom')b+=2.5;if(F.cas==='dat'&&vb&&/^(do|dico|narro|mitto|ostendo|credo|pareo|impero|persuadeo|faueo|noceo|placeo|respondeo|scribo|monstro|trado|praebeo|dono|nuntio|promitto|reddo)$/.test(norm(vb.lem)))b+=1.2;if(F.cas==='gen'||F.cas==='dat')b-=0.2;
       if((x.pos==='adj'||F.mood==='part')&&F.cas){if(toks.some((u,j)=>j!==i&&u.c&&u.c.pos==='noun'&&u.c.f.cas===F.cas&&u.c.f.num===F.num&&(!u.c.f.gen&&!F.gen||nounGen(u.c)===F.gen||!F.gen)))b+=2.5}
       if(x.pos==='noun'&&F.cas&&toks.some((u,j)=>j!==i&&u.c&&u.c.pos==='adj'&&u.c.f.cas===F.cas&&u.c.f.num===F.num))b+=1;
       if(x.pos==='verb'&&(F.mood==='ind')&&verbs.length===0)b+=3;
@@ -108,7 +108,7 @@ function translate(toks,end){end=end||'.';VARS=[];{const G=GRT(toks);if(G){const
   const vx0=(toks.find(t=>t.c&&t.c.pos==='verb'&&/^(ind|subj|imp)$/.test(t.c.f.mood))||{}).c;
   let pppI=-1;{const vi=toks.findIndex(t=>t.c&&t.c.pos==='verb'&&/^(ind|subj)$/.test(t.c.f.mood)&&norm(t.c.lem)==='sum');if(vi>=0)pppI=toks.findIndex(t=>t.c&&t.c.f.mood==='part'&&t.c.f.tense==='pf'&&t.c.f.cas==='nom')}
   if(pppI>=0)used.add(pppI);
-  let attrI=-1;if(vx0&&norm(vx0.lem)==='sum'&&pppI<0){const vi=toks.findIndex(t=>t.c===vx0);let bd=99;toks.forEach((t,i)=>{if(t.c&&t.c.pos==='adj'&&t.c.f.cas==='nom'){const d=Math.abs(i-vi);if(d<bd){bd=d;attrI=i}}})}
+  let attrI=-1;const nomN=toks.filter(t=>t.c&&t.c.pos==='noun'&&t.c.f.cas==='nom').length;if(vx0&&norm(vx0.lem)==='sum'&&pppI<0&&!(nomN>=2||nomN>=1&&(vx0.f.pers===1||vx0.f.pers===2))){const vi=toks.findIndex(t=>t.c===vx0);let bd=99;toks.forEach((t,i)=>{if(t.c&&t.c.pos==='adj'&&t.c.f.cas==='nom'){const d=Math.abs(i-vi);if(d<bd){bd=d;attrI=i}}})}
   const NP=[];toks.forEach((t,i)=>{const x=t.c;if(i===whI)return;if(x&&(x.pos==='noun'||(x.pos==='pron'&&x.f.cas))&&!(x.pos==='pron'&&PERS_PRON[norm(x.lem)]!==undefined&&x.f.cas==='nom'))NP.push({i,head:x,adjs:[],gens:[]})});
   toks.forEach((t,i)=>{const x=t.c;if(!x||i===pppI||i===attrI)return;if((x.pos==='adj'||(x.f.mood==='part'&&x.f.cas))){let best=null,bd=99;for(const n of NP){if(n.head.f.cas===x.f.cas&&n.head.f.num===x.f.num&&(!x.f.gen||nounGen(n.head)===x.f.gen||!nounGen(n.head))){const d=Math.abs(n.i-i);if(d<bd){bd=d;best=n}}}if(best){best.adjs.push({i,x});used.add(i)}}});
   toks.forEach((t,i)=>{const x=t.c;if(x&&x.pos==='adj'&&x.f.cas&&!used.has(i)&&i!==pppI&&!(vx0&&norm(vx0.lem)==='sum'&&x.f.cas==='nom')){NP.push({i,head:Object.assign({},x,{pos:'noun',subst:true}),adjs:[],gens:[]});used.add(i)}});NP.sort((a,b)=>a.i-b.i);
@@ -118,7 +118,7 @@ function translate(toks,end){end=end||'.';VARS=[];{const G=GRT(toks);if(G){const
     const r=nounFr(n.head,{def});const before=[],after=[];
     {const q=n.adjs.find(a=>/^(multus|omnis|nullus)$/.test(norm(a.x.lem)));if(q){const hg=ovr(n.head)||cleanGloss(n.head.gloss);const k=norm(q.x.lem);const pl=r.n==='p';const noun=pl?FR.plural(hg):hg;const rest=n.adjs.filter(a=>a!==q).map(a=>adjFr(a.x,r.g,r.n));let det=k==='multus'?(pl?(r.g==='f'?'de nombreuses':'de nombreux'):'beaucoup de'):k==='omnis'?(pl?(r.g==='f'?'toutes les':'tous les'):(r.g==='f'?'toute la':'tout le')):(r.g==='f'?'aucune':'aucun');let txt=(det+' '+noun+(rest.length?' '+rest.join(' '):'')).replace(/ de ([aeiouyéèh])/i," d'$1");return {txt,g:r.g,n:r.n}}}
     for(const a of n.adjs){const s=adjFr(a.x,r.g,r.n);(FR.BEFORE.has(bestGloss(a.x))?before:after).push(s)}
-    let txt=r.txt;if(before.length){txt=FR.np(before.join(' ')+' '+(ovr(n.head)||cleanGloss(n.head.gloss)),{g:r.g,n:r.n});if(r.n==='p'){const w=FR.plural(ovr(n.head)||cleanGloss(n.head.gloss));txt=FR.np(before.join(' ')+' '+w,{g:r.g,n:'s'}).replace(/^(le|la|l')\s?/,'les ')}}
+    let txt=r.txt;if(before.length){txt=FR.np(before.join(' ')+' '+(ovr(n.head)||cleanGloss(n.head.gloss)),{g:r.g,n:r.n,def});if(r.n==='p'){const w=FR.plural(ovr(n.head)||cleanGloss(n.head.gloss));txt=FR.np(before.join(' ')+' '+w,{g:r.g,n:'s'}).replace(/^(le|la|l')\s?/,'les ')}}
     if(after.length)txt+=' '+after.join(' ');
     for(const gn of n.gens)txt=withPrep(txt+' de',npText(gn).txt).replace(/ de de /,' de ');
     if(n.coord&&!n.inCoord){let g=r.g;for(const m of n.coord){m.inCoord=true;const z=npText(m);txt+=' et '+z.txt;if(z.g==='m')g='m';for(const a of m.adjs)used.add(a.i);used.add(m.i)}return {txt,g,n:'p'}}
@@ -137,7 +137,8 @@ function translate(toks,end){end=end||'.';VARS=[];{const G=GRT(toks);if(G){const
   /* roles */
   let sG=null,sN=null;
   for(const n of NP){if(n.attached)continue;const cs=n.head.f.cas;
-    if(cs==='nom'){if(!subj&&vx&&(vx.f.pers===3||!vx.f.pers)&&(!vx.f.num||n.head.f.num===vx.f.num||n.coord)){const r=npText(n);subj=r;sG=r.g;sN=r.n}else if(vx&&norm(vx.lem)==='sum'&&subj)attr=npText(n,false).txt;else if(!subj){const r=npText(n);subj=r;sG=r.g;sN=r.n}else rest.push({i:n.i,txt:npText(n).txt})}
+    if(cs==='nom'&&vx&&norm(vx.lem)==='sum'&&(vx.f.pers===1||vx.f.pers===2)&&!ppp){attr=npText(n,false).txt}
+    else if(cs==='nom'){if(!subj&&vx&&(vx.f.pers===3||!vx.f.pers)&&(!vx.f.num||n.head.f.num===vx.f.num||n.coord)){const r=npText(n);subj=r;sG=r.g;sN=r.n}else if(vx&&norm(vx.lem)==='sum'&&subj)attr=npText(n,false).txt;else if(!subj){const r=npText(n);subj=r;sG=r.g;sN=r.n}else rest.push({i:n.i,txt:npText(n).txt})}
     else if(cs==='acc'){const pv=toks[n.i-1]&&toks[n.i-1].c;if(pv&&pv.pos==='prep')rest.push({i:n.i-1,txt:prepNP(pv,npText(n).txt,pass)});else{const k=norm(n.head.lem);if(n.head.pos==='pron'&&OBJ_CLITIC[k])clitics.push(OBJ_CLITIC[k][0]);else objs.push(npText(n).txt)}}
     else if(cs==='dat'){const k=norm(n.head.lem);if(n.head.pos==='pron'&&OBJ_CLITIC[k])clitics.push(OBJ_CLITIC[k][1]);else dats.push(withPrep('à',npText(n).txt))}
     else if(cs==='abl'||cs==='loc'){const pv=toks[n.i-1]&&toks[n.i-1].c;if(pv&&pv.pos==='prep')rest.push({i:n.i-1,txt:prepNP(pv,npText(n).txt,pass)});else rest.push({i:n.i,txt:withPrep(pass?'par':'avec',npText(n).txt)})}

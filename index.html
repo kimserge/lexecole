@@ -163,7 +163,7 @@ footer a{color:var(--mut)}
 <li>FreeDict Latein–Deutsch — LexEikôn (GPL)</li>
 <li>W. Whitaker, <i>Words</i> (Latin–English) — LexEikôn</li>
 <li>Тананушко, <i>Латинско-русский словарь</i> — LexEikôn</li>
-<li><span data-i="own"></span></li></ul><div>LexEcôle · Sergey Kim · v0.30</div></footer>
+<li><span data-i="own"></span></li></ul><div>LexEcôle · Sergey Kim · v0.31</div></footer>
 </div>
 <script src="fr.js"></script>
 <script src="la.js"></script>
@@ -276,8 +276,7 @@ const CHARS={
  quadriga:{h:4,body:'#c9a227',hi:'#f3db7a',dk:'#8a6b0c',sp:8,horse:'#5a3a22',plume:'#b02a1f'},
  graeca:{h:2,body:'#8a5a32',hi:'#c08a5c',dk:'#553519',sp:4,horse:'#9a9a9a',plume:'#1d3a9e',shield:true},
  triumphus:{h:4,body:'#6b2b7a',hi:'#a76bb5',dk:'#40164a',sp:8,horse:'#f1efe8',plume:'#c9a227',laurel:true},
- plaustrum:{cart:true,h:1,body:'#9a6b3c',hi:'#c99a66',dk:'#5e3d1c',horse:'#8a6a4a'},
- navis:{ship:true,body:'#7a4b2a',hi:'#b07a4a',dk:'#4a2a14',sail:'#efe3c4',stripe:'#b02a1f'}};
+ plaustrum:{cart:true,h:1,body:'#9a6b3c',hi:'#c99a66',dk:'#5e3d1c',horse:'#8a6a4a'}};
 let CHARK=LS.get('char','biga');if(!CHARS[CHARK])CHARK='biga';
 function horse(x,y,col,plume,limp){const leg=limp?'L28 31 L26 31 L27 21':'L30 33 L27.5 33 L28 21';return `<g transform="translate(${x},${y})"><path d="M2 12 q-6 3 -5 13" stroke="#3a2a1e" stroke-width="2" fill="none"/><path d="M0 16 Q2 9 10 8 L23 8 Q27 2 33 0 L38 -1 L41 3 L37 5.5 L34 10 L33 18 ${leg} L15 21 L13 33 L10.5 33 L11 21 Q4 21 2 26 L0 26 Z" fill="${col}" stroke="#2a1c12" stroke-width=".6"/>${plume?`<path d="M34 0 q1 -6 5 -7" stroke="${plume}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`:''}<circle cx="36" cy="2.5" r=".9" fill="#111"/></g>`}
 function ox(x,y,col,limp){return `<g transform="translate(${x},${y})"><path d="M0 14 Q1 7 9 7 L28 7 Q31 4 35 5 L41 7 L42 12 L36 14 L34 20 L33 31 L30.5 31 ${limp?'L30 22':'L31 21'} L14 21 L13 31 L10.5 31 L11 21 Q3 21 1 24 L0 24 Z" fill="${col}" stroke="#2a1c12" stroke-width=".6"/><path d="M35 5 q2 -5 6 -5 M38 5 q4 -3 7 -1" stroke="#e8e0c8" stroke-width="1.6" fill="none"/><circle cx="38" cy="8.5" r=".9" fill="#111"/><path d="M1 12 q-4 2 -3 10" stroke="#2a1c12" stroke-width="1.6" fill="none"/></g>`}

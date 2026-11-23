@@ -67,9 +67,10 @@ function choose(toks){
 function nounGen(x){return x.f.gen||lemGen(x.L[2])}
 /* abbreviated labels (legend in the footer) */
 const AC={nom:'N',voc:'V',acc:'Ac',gen:'G',dat:'D',abl:'Ab',loc:'L'},AT={pres:'Prés',impf:'Impf',fut:'Fut',pf:'Pf',pqp:'Pqpf',fa:'FutAnt'},AM={subj:'Sj',imp:'Ip',inf:'If',part:'Pa',ger:'Gd',sup:'Su',adjv:'Gv'},AG={m:'m',f:'f',n:'nt'},APOS={noun:'nom subst',verb:'verb',adj:'nom adj',adv:'adv',prep:'prep',conj:'conj',pron:'pron',interj:'intrj',inv:'inv'};
-function label(x){if(!x)return ['?','',''];const F=x.f,L=x.L,pos=x.pos;const cl=classOf(L,pos==='verb'||F.mood?'v':'');const j=a=>a.filter(Boolean).join(' '),j2=a=>a.filter(Boolean).join(' · ');const NB=n=>n==='s'?'sg':n==='p'?'pl':'';
+const CW={fr:{d:'décl.',c:'conj.',a:'cl.',irr:'irr.',dep:'dép.'},de:{d:'Dekl.',c:'Konj.',a:'Kl.',irr:'unr.',dep:'Dep.'},en:{d:'decl.',c:'conj.',a:'cl.',irr:'irr.',dep:'dep.'},ru:{d:'скл.',c:'спр.',a:'кл.',irr:'неправ.',dep:'отлож.'}};
+function label(x,ui){if(!x)return ['?','',''];const W=CW[ui]||CW.fr;const F=x.f,L=x.L,pos=x.pos;const cl=classOf(L,pos==='verb'||F.mood?'v':'');const j=a=>a.filter(Boolean).join(' '),j2=a=>a.filter(Boolean).join(' · ');const NB=n=>n==='s'?'sg':n==='p'?'pl':'';
   let l1=APOS[pos]||pos,l2='',codes=[];
-  const cls=cl?(cl.k==='conj'?(cl.n==='irr'?'i':String(cl.n))+(cl.dep?'d':''):String(cl.n)):'';
+  const cls=cl?(cl.k==='conj'?(cl.n==='irr'?W.irr:String(cl.n)+' '+W.c)+(cl.dep?' '+W.dep:''):String(cl.n)+' '+(cl.k==='acl'?W.a:W.d)):'';
   if(F.mood==='part'){l1=j(['verb',cls]);l2=j2([AM.part,AT[F.tense],F.voice==='pass'&&'ps',AC[F.cas],NB(F.num),AG[F.gen]])}
   else if(pos==='verb'||F.mood){l1=j(['verb',cls]);
     if(F.mood==='inf')l2=j2([AM.inf,AT[F.tense],F.voice==='pass'&&'ps']);
@@ -169,7 +170,7 @@ function table(x,ui){if(!x)return null;const t=TH[ui]||TH.fr,P=D.par[x.L[1]],lem
     return {title:t.a+(cl&&cl.k==='acl'?' '+t.acl(cl.n):'')+' · '+g,rows:CASE_ORDER.map(([c,k])=>[c,end(b+k),end(b+6+k)]),cols:['sg','pl'],cur:[(x.mo-b)%6,x.mo-b>=6?2:1]}}
   if((x.pos==='verb')&&x.f.pers&&/^(ind|subj)$/.test(x.f.mood)){const F=x.f,key=f=>[f.tense,f.mood,f.voice].join('|');let start=null;
     for(let m=x.mo-5;m<=x.mo;m++){let ok=true;for(let k=0;k<6;k++){const ff=feats(D.morph[m+k]||'');if(key(ff)!==key(F)||ff.pers!==(k%3)+1){ok=false;break}}if(ok){start=m;break}}
-    if(start==null)return null;const lab=label(x)[1].replace(/(\s·)?\s*\d(sg|pl)$/,'');
+    if(start==null)return null;const lab=label(x,ui)[1].replace(/(\s·)?\s*\d(sg|pl)$/,'');
     return {title:t.v+(cl?' '+t.conj(cl.n):'')+' · '+lab,rows:[1,2,3].map(p=>[String(p),end(start+p-1),end(start+p+2)]),cols:['sg','pl'],cur:[(x.mo-start)%3,x.mo-start>=3?2:1]}}
   return null}
 return {load,table,analyze:analyzeTok,choose,label,translate,expect,norm,cleanGloss,senses}})();

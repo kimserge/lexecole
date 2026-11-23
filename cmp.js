@@ -38,9 +38,9 @@ function compare(user,prog,src,ui,grp){w=W[ui]||W.fr;
       if(sc>=2.8){c.ok=true;continue}
       if(sc>=2.4&&sc<2.8&&stem(c.u)!==stem(c.p)){c.ok=true;c.syn=true;continue}
       const s=link[c.k];
-      if(sc>=1.6){c.ok=false;c.fix=c.p;c.why=s?(s.label[0].replace(/\s+(\d+m?d?|i|id?)$/,'').replace(/\s+(m|f|nt|dé|id|sé)$/,'')+' '+(s.label[1]||'')).trim():'';errors++;continue}
+      if(sc>=1.6){c.ok=false;c.fix=c.p;c.why=s?(s.label[0].replace(/\s+(\d.*|irr\..*|unr\..*|неправ\..*)$/,'').replace(/\s+(m|f|nt|dé|id|sé)$/,'')+' '+(s.label[1]||'')).trim():'';errors++;continue}
       if(FUNC.has(c.u)&&FUNC.has(c.p)){c.ok=false;c.fix=c.p;const ART=/^(le|la|les|l'|un|une|des|du)$/;c.why='';c.minor=true;errors++;continue}
-      c.ok=false;c.fix=c.p;c.why=s?(s.label[0].replace(/\s+(\d+m?d?|i|id?)$/,'').replace(/\s+(m|f|nt|dé|id|sé)$/,'')+' '+(s.label[1]||'')).trim():'';errors++}
+      c.ok=false;c.fix=c.p;c.why=s?(s.label[0].replace(/\s+(\d.*|irr\..*|unr\..*|неправ\..*)$/,'').replace(/\s+(m|f|nt|dé|id|sé)$/,'')+' '+(s.label[1]||'')).trim():'';errors++}
     else if(c.u){if(FUNC.has(c.u)){c.ok=false;c.extra=true;c.minor=true;c.why='';errors++}else{c.ok=false;c.extra=true;c.why='';errors++}}
     else{c.ok=false;c.missing=true;c.fix=c.p;const s=link[c.k];c.why='';errors++}}
   return {cols,errors}}

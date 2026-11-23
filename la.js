@@ -43,10 +43,14 @@ function analyzeTok(w){let a=analyze(w);if(a.length)return {a,enc:''};
   return {a:[],enc:''}}
 const PREP_CASE=info=>/\+\s*abl/.test(info)&&/\+\s*acc/.test(info)?'acc|abl':/\+\s*abl/.test(info)?'abl':/\+\s*acc/.test(info)?'acc':/\+\s*gén/.test(info)?'gen':'';
 /* choose analyses in context */
+const GREET={aue:['Salut','Bonjour'],salue:['Bonjour','Salut'],uale:['Au revoir','Adieu'],auete:['Salut','Bonjour'],saluete:['Bonjour','Salut'],ualete:['Au revoir','Adieu']};
+const GRT=toks=>toks[0]&&GREET[norm(toks[0].w)];
 function choose(toks){
   for(const t of toks){for(const x of t.a){let s=Math.log(1+(x.freq||0));const F=x.f;
     if(F.cas==='voc')s-=3;if(F.cas==='loc')s-=3;if(F.mood==='sup')s-=3;if(F.mood==='imp'&&F.tense==='fut')s-=3;if(F.mood==='part'&&F.tense==='fut')s-=1.5;if(F.mood==='part')s-=2.5;if(F.mood==='adjv')s-=1.5;if(F.mood==='ger')s-=1;if(F.deg)s-=1;if(F.mood==='subj')s-=.8;
     const lp=/^[A-Z]/.test(x.lem.normalize('NFD').replace(/[\u0300-\u036f]/g,'')),wp=/^[A-Z]/.test(t.w);if(t.i===0){if(lp)s-=.3}else if(lp!==wp)s-=6;if(lp&&F.num==='p'&&x.pos==='noun')s-=1;if(!x.gloss)s-=4;
+    if(/^(ave|aue|salve|salue|vale|uale|avete|auete|salvete|saluete|valete|ualete)$/.test(norm(t.w))&&(x.pos==='interj'||x.pos==='adv'))s+=8;
+    if(GRT(toks)&&t.i>0&&F.cas==='voc')s+=6;
     x.base=s}}
   const pick=t=>t.a.length?t.a.reduce((b,x)=>((x.base+(x.bonus||0))>(b.base+(b.bonus||0))?x:b)):null;
   for(let it=0;it<3;it++){toks.forEach(t=>t.c=pick(t));
@@ -97,7 +101,7 @@ function withPrep(p,np){return (p+' '+np).replace(/(^|\s)à le /g,'$1au ').repla
 const WH={quis:'qui',quid:'que',ubi:'où',cur:'pourquoi',quando:'quand',quomodo:'comment',unde:"d'où",quo:'où',qualis:'quel',quantus:'combien',num:'',nonne:'',an:''};
 let VARS=[];
 const IDIOM={'quid est hoc':["Qu'est-ce que c'est ?","Qu'est-ce que cela ?"],'quis est':['Qui est-ce ?','Qui est-il ?'],'quid agis':['Que fais-tu ?','Comment vas-tu ?'],'salve':['Bonjour !','Salut !'],'salvete':['Bonjour !'],'vale':['Au revoir !','Porte-toi bien !'],'valete':['Au revoir !'],'quomodo vales':['Comment vas-tu ?'],'bene valeo':['Je vais bien.'],'gratias tibi ago':['Je te remercie.','Merci.'],'quot annos natus es':['Quel âge as-tu ?']};
-function translate(toks,end){end=end||'.';VARS=[];{const k=toks.map(t=>norm(t.w)).join(' ');if(IDIOM[k]){VARS=IDIOM[k].slice();return VARS[0]}}const Q=end==='?';let whI=-1,wh='';if(Q){const wk=t=>WH[norm(t.w)]!==undefined?norm(t.w):t.c&&WH[norm(t.c.lem).replace(/\d+$/,'')]!==undefined?norm(t.c.lem).replace(/\d+$/,''):null;whI=toks.findIndex(t=>wk(t));if(whI>=0)wh=WH[wk(toks[whI])]}const whSubj=whI>=0&&wh==='qui'&&toks[whI].c&&(toks[whI].c.f.cas==='nom'||!toks[whI].c.f.cas)&&!toks.some(t=>t.c&&t.c.pos==='verb'&&t.c.f.pers&&t.c.f.pers!==3);
+function translate(toks,end){end=end||'.';VARS=[];{const G=GRT(toks);if(G){const names=toks.slice(1).map(t=>{const x=t.c;if(!x)return t.w;const g=ovr(x)||cleanGloss(x.gloss)||t.w;return x.pos==='noun'&&!/^[A-ZÀ-Ý]/.test(g)&&x.f.num==='p'?FR.plural(g):g}).join(' ');const e=end==='?'?' ?':' !';VARS=G.map(g=>names?g+', '+names+e:g+e);return VARS[0]}}{const k=toks.map(t=>norm(t.w)).join(' ');if(IDIOM[k]){VARS=IDIOM[k].slice();return VARS[0]}}const Q=end==='?';let whI=-1,wh='';if(Q){const wk=t=>WH[norm(t.w)]!==undefined?norm(t.w):t.c&&WH[norm(t.c.lem).replace(/\d+$/,'')]!==undefined?norm(t.c.lem).replace(/\d+$/,''):null;whI=toks.findIndex(t=>wk(t));if(whI>=0)wh=WH[wk(toks[whI])]}const whSubj=whI>=0&&wh==='qui'&&toks[whI].c&&(toks[whI].c.f.cas==='nom'||!toks[whI].c.f.cas)&&!toks.some(t=>t.c&&t.c.pos==='verb'&&t.c.f.pers&&t.c.f.pers!==3);
   const used=new Set(),parts=[];if(whI>=0)used.add(whI);let verb=null,neg=false,subj=null,attr=null,objs=[],dats=[],rest=[],front=[],clitics=[];
   const c=i=>toks[i]&&toks[i].c;
   /* noun phrases: head noun + adjectives agreeing + following genitive */

@@ -153,5 +153,8 @@ function question(o){const wh=o.wh||'',tail=o.tail||'',core=[o.subj,o.vt,tail].f
   if(wh&&!/^(pourquoi|qui)$/.test(wh)&&o.subj&&!tail&&!/\s/.test(o.vt))out.push(wh+' '+o.vt+' '+o.subj);
   if(inv&&!(wh==='que'&&o.subj))out.push(inv);out.push(esk);if(!wh)out.push(core);else out.push(core+' '+(wh==='que'?'quoi':wh));
   return out.map(x=>x.replace(/\s+/g,' ').trim().replace(/^que ([aeiouyéèêh])/i,"qu'$1"))}
-return {question,conj,np,adj,art,plural,genderOf,setFem,BEFORE,elide,PRON,simple,data}})();
+function adv(a,deg){const irr={bon:'bien',mauvais:'mal',rapide:'vite',lent:'lentement',fort:'fort',bruyant:'fort',doux:'doucement',gentil:'gentiment',vrai:'vraiment',facile:'facilement',difficile:'difficilement',sérieux:'sérieusement',heureux:'heureusement',long:'longtemps',beau:'bien',joli:'joliment',calme:'calmement',clair:'clairement',silencieux:'silencieusement',seul:'seul',ensemble:'ensemble'};
+  let b=irr[a]||(/ant$/.test(a)?a.slice(0,-3)+'amment':/ent$/.test(a)?a.slice(0,-3)+'emment':/[aeiouéi]$/.test(a)?a+'ment':adj(a,'f','s')+'ment');
+  if(deg==='comp')return b==='bien'?'mieux':'plus '+b;if(deg==='sup')return b==='bien'?'le mieux':'le plus '+b;return b}
+return {adv,question,conj,np,adj,art,plural,genderOf,setFem,BEFORE,elide,PRON,simple,data}})();
 if(typeof module!=='undefined')module.exports=FR;

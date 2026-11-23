@@ -5,7 +5,7 @@ const W={fr:{form:'forme',num:'nombre',pl:'pluriel',sg:'singulier',agr:'accord',
 const deacc=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
 const FUNC0=new Set("le la les l' un une des du de d' à au aux et ou en dans sur avec par pour ne n' pas que qu' qui se s' il elle ils elles je j' tu nous vous on ce cet cette ces son sa ses mon ma mes ton ta tes".split(' '));
 const FUNC={has:w=>FUNC0.has(String(w).toLowerCase())};
-function tok(s){return (s.replace(/[.!?;:«»"]/g,' ').replace(/,/g,' ').match(/[a-zà-ÿœæç\-]+'?|'/gi)||[]).flatMap(w=>{const m=w.match(/^([a-zà-ÿ]{1,2}')(.+)$/i);return m?[m[1],m[2]]:[w]}).filter(w=>w!=="'")}
+function tok(s){s=s.replace(/s'il (vous|te) pla[iî]t/gi,(m)=>m.replace(/ /g,'\u00a0')).replace(/est-ce (que|qui)/gi,(m)=>m.replace(/[ -]/g,'\u00a0'));s=s.replace(/-(?:t-)?(je|tu|il|elle|on|nous|vous|ils|elles|ce|moi|toi)\b/gi,' $1');return (s.replace(/[.!?;:«»"]/g,' ').replace(/,/g,' ').match(/[a-zà-ÿœæç\-\u00a0']+'?|'/gi)||[]).flatMap(w=>{if(/\u00a0/.test(w))return [w];const m=w.match(/^([a-zà-ÿ]{1,2}')(.+)$/i);return m?[m[1],m[2]]:[w]}).filter(w=>w!=="'")}
 const SUF='issaient issions issiez issons issez issent aient erent ions iez ons ez ent ais ait ees ee es er ir re e s x ai a as ont it is i u ue us ues ant'.split(' ').sort((a,b)=>b.length-a.length);
 function stem(w){const s=deacc(w).replace(/'$/,'');if(s.length<=3)return s;for(const x of SUF)if(s.endsWith(x)&&s.length-x.length>=3)return s.slice(0,-x.length);return s}
 function sim(u,p,syn){if(u===p)return 3;if(/\s|'./.test(u)||/\s|'./.test(p)){const [au,nu]=split(u),[ap,np]=split(p);if(nu!==u||np!==p){const r=sim1(nu,np,syn);if(r>=2.8)return au.toLowerCase()===ap.toLowerCase()?3:2;return r}}return sim1(u,p,syn)}

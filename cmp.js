@@ -19,7 +19,7 @@ const split=g=>{const m=g.match(/^((?:de )?(?:les|le|la|l'|une|un|des|du|aux|au)
 function compare(user,prog,src,ui,grp){w=W[ui]||W.fr;
   let U=tok(user),P=tok(prog);if(grp){U=group(U);P=group(P)}
   // synonyms and source link for each program token
-  const link=P.map(p0=>{const p=split(p0)[1];const sp=stem(p);let best=null;for(const s of src){for(const e of s.exp){for(const ew of tok(e)){if(FUNC.has(ew))continue;const se=stem(ew);if(se&&(se===sp||se.length>=4&&sp.startsWith(se)||sp.length>=4&&se.startsWith(sp))){best=s;break}}if(best)break}if(best)break}return best});
+  const link=P.map(p0=>{const p=split(p0)[1];const sp=stem(p);let best=src.find(s=>s.exp.some(e=>deacc(e)===deacc(p)))||null;if(best)return best;for(const s of src){for(const e of s.exp){for(const ew of tok(e)){if(FUNC.has(ew))continue;const se=stem(ew);if(se&&(se===sp||se.length>=4&&sp.startsWith(se)||sp.length>=4&&se.startsWith(sp))){best=s;break}}if(best)break}if(best)break}return best});
   {const isV=s=>/^(verb|VER)$/i.test(s.kind||'');const freeV=src.filter(s=>isV(s)&&!link.includes(s));
    const skip=(p0,i)=>link[i]||FUNC.has(p0)||/^[A-ZÀ-Ý]/.test(split(p0)[1])&&i>0||src.some(s=>deacc(s.w)===deacc(split(p0)[1]));
    P.forEach((p0,i)=>{if(skip(p0,i))return;const p=deacc(split(p0)[1]);const b=freeV.find(s=>s.exp.some(e=>deacc(e).slice(0,2)===p.slice(0,2)));if(b){link[i]=b;freeV.splice(freeV.indexOf(b),1)}});
@@ -31,7 +31,7 @@ function compare(user,prog,src,ui,grp){w=W[ui]||W.fr;
   for(let i=1;i<=n;i++)for(let j=1;j<=m;j++){const d=S[i-1][j-1]+sim(U[i-1],P[j-1],syns[j-1]),a=S[i-1][j]+G,b=S[i][j-1]+G;if(d>=a&&d>=b){S[i][j]=d;B[i][j]=0}else if(a>=b){S[i][j]=a;B[i][j]=1}else{S[i][j]=b;B[i][j]=2}}
   const cols=[];let i=n,j=m;
   while(i>0||j>0){if(i>0&&j>0&&B[i][j]===0){cols.push({u:U[i-1],p:P[j-1],k:j-1});i--;j--}else if(i>0&&(j===0||B[i][j]===1)){cols.push({u:U[i-1],p:null});i--}else{cols.push({u:null,p:P[j-1],k:j-1});j--}}
-  cols.reverse();
+  cols.reverse();{const seen=new Set();for(const c of cols){const s=c.k!=null&&link[c.k];if(s&&!seen.has(s)){c.src=s.w;seen.add(s)}}}
   let errors=0;
   for(const c of cols){
     if(c.u&&c.p){const sc=sim(c.u,c.p,syns[c.k]);

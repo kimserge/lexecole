@@ -20,7 +20,7 @@ const possKey=w=>{const m=w.match(/^(mein|dein|sein|unser|euer|eur|ihr|Ihr)/i);r
 /* choose */
 function choose(toks){
   const n=toks.length;
-  toks.forEach(t=>{t.a.forEach(x=>{let s=0;const f=x.f;if(f.pos==='SUB')s+=1;if(f.pos==='VER'&&(f.pers||f.inf||f.pa2))s+=1;if(f.tense==='kj1')s-=2;if(f.tense==='kj2'&&!f.aux&&!f.mod)s-=1;if(f.imp)s-=1.5;if(f.pos==='ZUS')s-=1;if(x.gloss)s+=.5;if(f.pos==='PRO'&&f.sub==='DEM'&&toks[t.i+1]&&toks[t.i+1].a.some(y=>y.pos==='SUB'))s-=2;if(t.i===0&&f.pos==='ADV')s+=1.5;if(/^bitte$/i.test(t.w)&&f.pos==='ADV'&&t.i>0)s+=3;if(t.i===0&&/^sie$/i.test(t.w)&&f.cas==='nom')s+=3;const nx=toks[t.i+1];if(f.pos==='ZAL'&&nx&&nx.a.some(y=>y.pos==='SUB'))s+=3;if(f.pos==='ART'&&nx&&nx.a.some(y=>y.pos==='SUB'||y.pos==='ADJ'))s+=1.5;x.base=s})});
+  toks.forEach(t=>{t.a.forEach(x=>{let s=0;const f=x.f;if(f.pos==='SUB')s+=1;if(f.pos==='VER'&&(f.pers||f.inf||f.pa2))s+=1;if(f.tense==='kj1')s-=2;if(f.tense==='kj2'&&!f.aux&&!f.mod)s-=1;if(f.imp)s-=1.5;if(f.pos==='ZUS')s-=1;if(x.gloss)s+=.5;if(f.pos==='PRO'&&f.sub==='DEM'&&toks[t.i+1]&&toks[t.i+1].a.some(y=>y.pos==='SUB'))s-=2;if(t.i===0&&f.pos==='ADV')s+=1.5;if(toks.length===1&&f.inf)s+=2;if(/^bitte$/i.test(t.w)&&f.pos==='ADV'&&t.i>0)s+=3;if(t.i===0&&/^sie$/i.test(t.w)&&f.cas==='nom')s+=3;const nx=toks[t.i+1];if(f.pos==='ZAL'&&nx&&nx.a.some(y=>y.pos==='SUB'))s+=3;if(f.pos==='ART'&&nx&&nx.a.some(y=>y.pos==='SUB'||y.pos==='ADJ'))s+=1.5;x.base=s})});
   const pick=t=>t.a.length?t.a.reduce((b,x)=>(x.base+(x.bonus||0)>b.base+(b.bonus||0)?x:b)):null;
   for(let it=0;it<3;it++){toks.forEach(t=>t.c=pick(t));
     const fin=toks.find(t=>t.c&&t.c.pos==='VER'&&t.c.f.pers);
@@ -183,8 +183,18 @@ const THD={fr:{n:'nom',v:'verbe',m:'masc.',f:'fém.',n_:'neutre',pres:'présent'
 function table(x,ui){if(!x||x.li<0)return null;const t=THD[ui]||THD.fr,L=byLemma().get(x.li)||[];const f=x.f;
   if(f.pos==='SUB'){const g=f.gen||'m';const get=(c,n)=>{let w=[...new Set(L.filter(([,tg])=>{const p=parse(tg);return p.pos==='SUB'&&p.cas===c&&p.num===n}).map(([w])=>w))];if(w.length>1&&c==='dat'&&n==='s')w=w.filter(x=>!/e$/.test(x)||w.every(y=>/e$/.test(y)));if(w.length>1&&c==='gen'&&n==='s'&&w.some(x=>/es$/.test(x)))w=w.filter(x=>/es$/.test(x));return w.length?(n==='p'?ART.p[c]:ART[g][c])+' '+w.join(', '):'—'};
     const CS=['nom','acc','dat','gen'];return {title:t.n+' '+(g==='n'?t.n_:t[g]),rows:[['N','nom'],['Ac','acc'],['D','dat'],['G','gen']].map(([l,c])=>[l,get(c,'s'),get(c,'p')]),cols:['sg','pl'],cur:[CS.indexOf(f.cas),f.num==='p'?2:1]}}
+  if(f.pos==='ADJ'||f.pos==='PA1'||f.pos==='PA2'){const ff=pr=>[...new Set(L.filter(([,tg])=>pr(parse(tg))).map(([w])=>w))];const pos=ff(q=>q.pos==='ADJ'&&q.prd&&!q.deg)[0]||x.lem,k=ff(q=>q.pos==='ADJ'&&q.prd&&q.deg==='comp')[0],sp=ff(q=>q.pos==='ADJ'&&q.deg==='sup');const lab={fr:['positif','comparatif','superlatif'],de:['Positiv','Komparativ','Superlativ'],en:['positive','comparative','superlative'],ru:['полож.','сравн.','превосх.']}[ui]||['positif','comparatif','superlatif'];const ttl={fr:'adjectif',de:'Adjektiv',en:'adjective',ru:'прил.'}[ui]||'adjectif';
+    return {title:ttl,rows:[[lab[0],pos,''],[lab[1],k||'—',''],[lab[2],sp.length?'am '+(sp.find(w=>/sten$/.test(w))||sp[0]):'—','']],cols:['',''],one:true,cur:[f.deg==='comp'?1:f.deg==='sup'?2:0,1]}}
+  if(f.pos==='VER'&&f.inf){const tn='pres';const get=(p,n)=>{const w=[...new Set(L.filter(([,tg])=>{const q=parse(tg);return q.pos==='VER'&&q.pers===p&&q.num===n&&q.tense===tn&&!q.aux&&!q.mod||q.pos==='VER'&&q.pers===p&&q.num===n&&q.tense===tn}).map(([w])=>w))];return w.length?w.slice(0,2).join(', '):'—'};
+    return {title:t.v+' · '+t[tn],rows:[1,2,3].map(p=>[String(p),get(p,'s'),get(p,'p')]),cols:['sg','pl'],cur:null}}
   if(f.pos==='VER'&&f.pers){const tn=f.tense==='prt'?'prt':'pres';const get=(p,n)=>{const w=[...new Set(L.filter(([,tg])=>{const q=parse(tg);return q.pos==='VER'&&q.pers===p&&q.num===n&&q.tense===tn}).map(([w])=>w))];return w.length?w.join(', '):'—'};
     return {title:t.v+' · '+t[tn],rows:[1,2,3].map(p=>[String(p),get(p,'s'),get(p,'p')]),cols:['sg','pl'],cur:[f.pers-1,f.num==='p'?2:1]}}
   return null}
-return {variants:()=>VARS,load,table,analyze,choose,label,translate,expect}})();
+function entry(x){if(!x||x.li<0)return null;const L=byLemma().get(x.li)||[];const f=x.f;const ff=pr=>[...new Set(L.filter(([,tg])=>pr(parse(tg))).map(([w])=>w))];
+  const senses=(x.gloss||'').split(/[,;]/).map(z=>z.trim()).filter(Boolean);let hw=x.lem,info='';
+  if(f.pos==='SUB'){const g=f.gen||(parse((L.find(([,tg])=>/^SUB/.test(tg))||['','SUB'])[1]).gen);hw=({m:'der',f:'die',n:'das'}[g]||'')+' '+x.lem;const gs=ff(q=>q.pos==='SUB'&&q.cas==='gen'&&q.num==='s'),pl=ff(q=>q.pos==='SUB'&&q.cas==='nom'&&q.num==='p');info=[gs.length?(g==='f'?'der ':'des ')+gs.filter(w=>/es$/.test(w)||gs.length===1).slice(0,1).join(''):'',pl.length?'die '+pl[0]:''].filter(Boolean).join(' · ')}
+  else if(f.pos==='VER'){const prt=ff(q=>q.pos==='VER'&&q.pers===3&&q.num==='s'&&q.tense==='prt'),pa2=ff(q=>q.pos==='VER'&&q.pa2),p3=ff(q=>q.pos==='VER'&&q.pers===3&&q.num==='s'&&q.tense==='pres');info=[p3[0],prt[0],pa2[0]].filter(Boolean).join(' · ')}
+  else if(f.pos==='ADJ'){const k=ff(q=>q.pos==='ADJ'&&q.prd&&q.deg==='comp'),sp=ff(q=>q.pos==='ADJ'&&q.deg==='sup');info=[k[0],sp.length?'am '+(sp.find(w=>/sten$/.test(w))||sp[0]):''].filter(Boolean).join(' · ')}
+  return {hw,info,senses}}
+return {entry,variants:()=>VARS,load,table,analyze,choose,label,translate,expect}})();
 if(typeof module!=='undefined')module.exports=DE;

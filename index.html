@@ -111,7 +111,7 @@ footer a{color:var(--mut)}
 .load{font:13px var(--sans);color:var(--mut)}
 @media(min-width:900px){.one{flex-wrap:nowrap;justify-content:space-between;gap:24px}.one .ana{flex:1 1 auto}.tb{flex:0 0 380px;width:380px;margin-left:auto;font-size:14px}.tb td{font-size:16px}.tb .th{font-size:14px}.w .a{font-size:13.5px}.w .f{font-size:26px}}
 @media(max-width:600px){.cmp .u{font-size:22px;height:32px}.cmp td.pg{font-size:15px;height:60px}.cmp .fx{font-size:14px}.srcw{font-size:19px;gap:10px}table.cmp td.lab.carl{width:60px}table.cmp td.lab.carl svg{width:58px;height:29px}td.arr{height:50px}}
-@media(max-width:420px){.cmp .u{font-size:19px;height:28px}.srcw{font-size:17px;gap:8px}table.cmp{border-spacing:5px 0}.cmp td.pg{font-size:14px}.cmp .fx{font-size:13px}.cmp .why{font-size:9.5px}table.cmp td.lab.carl{width:50px}table.cmp td.lab.carl svg{width:48px;height:24px}h1{font-size:34px}.w{max-width:120px}.w .f{font-size:20px}}
+@media(max-width:420px){.tb td{white-space:normal;font-size:14px;padding:4px 6px}.cmp .u{font-size:19px;height:28px}.srcw{font-size:17px;gap:8px}table.cmp{border-spacing:5px 0}.cmp td.pg{font-size:14px}.cmp .fx{font-size:13px}.cmp .why{font-size:9.5px}table.cmp td.lab.carl{width:50px}table.cmp td.lab.carl svg{width:48px;height:24px}h1{font-size:34px}.w{max-width:120px}.w .f{font-size:20px}}
 </style>
 </head>
 <body>
@@ -163,12 +163,12 @@ footer a{color:var(--mut)}
 <li>FreeDict Latein–Deutsch — LexEikôn (GPL)</li>
 <li>W. Whitaker, <i>Words</i> (Latin–English) — LexEikôn</li>
 <li>Тананушко, <i>Латинско-русский словарь</i> — LexEikôn</li>
-<li><span data-i="own"></span></li></ul><div>LexEcôle · Sergey Kim · v0.37</div></footer>
+<li><span data-i="own"></span></li></ul><div>LexEcôle · Sergey Kim · v0.38</div></footer>
 </div>
-<script src="fr.js?v=37"></script>
-<script src="la.js?v=37"></script>
-<script src="de.js?v=37"></script>
-<script src="cmp.js?v=37"></script>
+<script src="fr.js?v=38"></script>
+<script src="la.js?v=38"></script>
+<script src="de.js?v=38"></script>
+<script src="cmp.js?v=38"></script>
 <script>
 'use strict';
 const I18N={
@@ -226,6 +226,7 @@ const dnorm=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().r
 function loadDict(id){if(dcache[id])return dcache[id];return dcache[id]=fetch(LXD+id+'.json').then(r=>r.json()).then(d=>{const m=new Map();for(const e of d.entries){const k=dnorm(e[0]);if(!m.has(k))m.set(k,[]);m.get(k).push(e)}return m}).catch(()=>{delete dcache[id];return null})}
 function fmtDef(t){t=t.replace(/\n?\x04[\s\S]*?\x05/g,'').replace(/\n{2,}/g,'\n').trim();return esc(t).replace(/\x02/g,'<span class="gr">').replace(/\x03/g,'</span>').replace(/\x04/g,'<div class="ex">').replace(/\x05/g,'</div>').replace(/\x06/g,'<i>').replace(/\x07/g,'</i>').replace(/\x0b/g,'<span class="gy">').replace(/\x0c/g,'</span>').replace(/[\x00-\x08\x0e-\x1f\ue000-\uf8ff]/g,'').replace(/\n/g,'<br>').replace(/(<br>)?<div/g,'<div').replace(/<\/div><br>/g,'</div>')}
 async function renderDic(){const box=$('#dic'),L=DICTS[LG]||[];const x=toks[0];
+  if(LG==='de'){const E=single&&x&&x.c?DE.entry(x.c):null;if(!E){box.classList.add('hidden');return}box.classList.remove('hidden');$('#dch').innerHTML='';$('#dbody').innerHTML=`<div class="de"><div class="hw">${esc(E.hw)}</div>${E.info?`<div class="gy">${esc(E.info)}</div>`:''}<div>${E.senses.map(esc).join(', ')}</div></div>`;return}
   if(!single||!x||!L.length||!x.order.length){box.classList.add('hidden');return}
   box.classList.remove('hidden');dsel=(L.find(d=>d.l===UI)||L[0]).id;$('#dch').innerHTML='';
   const keys=[...new Set(x.order.map(y=>dnorm(y.lem.replace(/\d+$/,''))))];const body=$('#dbody');body.innerHTML='<div class="none">'+esc(t('loading'))+'</div>';
@@ -236,7 +237,7 @@ async function renderDic(){const box=$('#dic'),L=DICTS[LG]||[];const x=toks[0];
 $('#dch').addEventListener('click',e=>{const b=e.target.closest('button[data-d]');if(!b)return;dsel=b.dataset.d;renderDic()});
 function renderTb(){const b=$('#tb'),x=toks[0];const T=single&&x&&x.c?ENG[LG].table(x.c,UI):null;if(!T){b.classList.add('hidden');b.innerHTML='';return}
   b.classList.remove('hidden');const cur=(x.c.f&&ENG[LG]===LA)?LA.label(x.c)[1]:'';
-  const cc=(i,k)=>T.cur&&T.cur[0]===i&&T.cur[1]===k?'cur':'';b.innerHTML=`<div class="th">${esc(T.title)}</div><table>${T.rows.map((r,i)=>`<tr><td class="l">${esc(r[0])} ${T.cols[0]}</td><td class="${cc(i,1)}">${esc(r[1])}</td><td class="l">${esc(r[0])} ${T.cols[1]}</td><td class="${cc(i,2)}">${esc(r[2])}</td></tr>`).join('')}</table>`}
+  const cc=(i,k)=>T.cur&&T.cur[0]===i&&T.cur[1]===k?'cur':'';b.innerHTML=`<div class="th">${esc(T.title)}</div><table>${T.rows.map((r,i)=>T.one?`<tr><td class="l">${esc(r[0])}</td><td class="${cc(i,1)}">${esc(r[1])}</td></tr>`:`<tr><td class="l">${esc(r[0])} ${T.cols[0]}</td><td class="${cc(i,1)}">${esc(r[1])}</td><td class="l">${esc(r[0])} ${T.cols[1]}</td><td class="${cc(i,2)}">${esc(r[2])}</td></tr>`).join('')}</table>`}
 function isCur(x,cell){const w=x.w.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/j/g,'i').replace(/v/g,'u');return cell.split(', ').some(c=>{c=c.toLowerCase().replace(/^(der|die|das|den|dem|des) /,'');return c.startsWith('-')?w.endsWith(c.slice(1)):(c===w||c===x.w.toLowerCase())})}
 function renderAna(){const A=$('#ana'),al=$('#alts');
   A.innerHTML=toks.map((x,i)=>{if(!x.c)return `<div class="w unk"><div class="a"><span class="p">?</span><br>${esc(t('unk'))}</div><div class="f">${esc(x.w)}</div></div>`;

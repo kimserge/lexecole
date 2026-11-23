@@ -109,7 +109,7 @@ function isRefl(v){return /^s'|^se /.test(v)}
 function base(v){return v.replace(/^s'|^se /,'')}
 function agreePP(pp,g,n){if(!g&&!n)return pp;let s=pp;if(g==='f'&&!/e$/.test(s))s+='e';if(n==='p'&&!/[sx]$/.test(s))s+='s';return s}
 /* conj(verb gloss, tense, person 0-5, {neg, refl, passive, g, n, noPron}) → string */
-function conj(v,t,p,o={}){v=v.trim();if(!o.n&&p>=3)o=Object.assign({},o,{n:'p'});const refl=isRefl(v);let b=base(v);
+function conj(v,t,p,o={}){v=v.trim();{const m=v.match(/^((?:se |s')?\S+) (.+)$/);if(m&&!/^(se|s')$/.test(m[1])){return conj(m[1],t,p,o)+' '+m[2]}}if(!o.n&&p>=3)o=Object.assign({},o,{n:'p'});const refl=isRefl(v);let b=base(v);
   const pron=o.noPron?'':(o.g==='f'&&(p===2||p===5)?PRONF:PRON)[p];
   let aux=null,main,ppAgree=false;
   const comp={pc:'pres',pqp:'impf',fa:'fut',condp:'cond',subjp:'subj'};
@@ -150,7 +150,8 @@ function invNP(v,g,n){const r=v.split(' ');if(/^(ne|n'|me|m'|te|t'|se|s'|le|la|l
 function question(o){const wh=o.wh||'',tail=o.tail||'',core=[o.subj,o.vt,tail].filter(Boolean).join(' ');const out=[];
   const esk=(wh==='que'?"qu'est-ce ":wh?wh+' est-ce ':'est-ce ')+(/^[aeiouyéèêh]/i.test(core)?"qu'"+core:'que '+core);
   let inv=null;if(o.subj){const iv=invNP(o.vt,o.g,o.n);if(iv)inv=[wh==='que'?null:wh,o.subj,iv,tail].filter(Boolean).join(' ')}else{const iv=invPron(o.vt);if(iv)inv=[wh,iv,tail].filter(Boolean).join(' ')}
+  if(wh&&!/^(pourquoi|qui)$/.test(wh)&&o.subj&&!tail&&!/\s/.test(o.vt))out.push(wh+' '+o.vt+' '+o.subj);
   if(inv&&!(wh==='que'&&o.subj))out.push(inv);out.push(esk);if(!wh)out.push(core);else out.push(core+' '+(wh==='que'?'quoi':wh));
-  return out.map(x=>x.replace(/\s+/g,' ').trim())}
+  return out.map(x=>x.replace(/\s+/g,' ').trim().replace(/^que ([aeiouyéèêh])/i,"qu'$1"))}
 return {question,conj,np,adj,art,plural,genderOf,setFem,BEFORE,elide,PRON,simple,data}})();
 if(typeof module!=='undefined')module.exports=FR;

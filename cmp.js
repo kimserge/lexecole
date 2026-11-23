@@ -32,6 +32,7 @@ function compare(user,prog,src,ui,grp){w=W[ui]||W.fr;
   const cols=[];let i=n,j=m;
   while(i>0||j>0){if(i>0&&j>0&&B[i][j]===0){cols.push({u:U[i-1],p:P[j-1],k:j-1});i--;j--}else if(i>0&&(j===0||B[i][j]===1)){cols.push({u:U[i-1],p:null});i--}else{cols.push({u:null,p:P[j-1],k:j-1});j--}}
   cols.reverse();for(const c of cols){const s=c.k!=null&&link[c.k];if(s){c.si=s.i}}
+  for(const s of src){if(cols.some(c=>c.si===s.i))continue;const st=new Set(s.exp.flatMap(e=>tok(e)).filter(w=>!FUNC.has(w)).map(stem));const c=cols.find(c=>c.si==null&&((c.p&&st.has(stem(split(c.p)[1])))||(c.u&&st.has(stem(split(c.u)[1])))));if(c)c.si=s.i}
   let errors=0;
   for(const c of cols){
     if(c.u&&c.p){const sc=sim(c.u,c.p,syns[c.k]);

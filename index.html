@@ -138,6 +138,7 @@ footer a{color:var(--mut)}
   <ul class="alts hidden" id="alts"></ul>
   <div class="dic hidden" id="dic"><div class="dch" id="dch"></div><div class="dbody" id="dbody"></div></div>
   <div class="row"><button class="btn ghost" id="chk" data-i="chk"></button></div>
+  <div class="scene" id="scene2"></div>
 </section>
 
 <section class="card hidden" id="c3">
@@ -162,7 +163,7 @@ footer a{color:var(--mut)}
 <li>FreeDict Latein–Deutsch — LexEikôn (GPL)</li>
 <li>W. Whitaker, <i>Words</i> (Latin–English) — LexEikôn</li>
 <li>Тананушко, <i>Латинско-русский словарь</i> — LexEikôn</li>
-<li><span data-i="own"></span></li></ul><div>LexEcôle · Sergey Kim · v0.27</div></footer>
+<li><span data-i="own"></span></li></ul><div>LexEcôle · Sergey Kim · v0.28</div></footer>
 </div>
 <script src="fr.js"></script>
 <script src="la.js"></script>
@@ -328,7 +329,11 @@ function classSVG(){const lines=LG==='de'?['ich bin','du bist','er ist']:['amo',
   ${nest(veh({label:'LexEcôle',err:0,w:110}),112,50)}
   ${nest(veh({label:UI==='ru'?'У':'L',err:0,w:96}),2,58)}
   </svg>`}
-function renderScene(){const e=$('#scene');if(e)e.innerHTML=classSVG()}
+function gateSVG(){const nest=(svg,x,y)=>`<g transform="translate(${x},${y})">${svg}</g>`;
+  const gate=LG==='la'?`<g><rect x="190" y="14" width="140" height="90" fill="#d9cdb2" stroke="#9c8a66" stroke-width="1.5"/>${[0,1,2,3,4,5].map(r=>`<path d="M190 ${26+r*13} H330" stroke="#b8a987" stroke-width=".8"/>`).join('')}<path d="M226 104 V62 A34 34 0 0 1 294 62 V104 Z" fill="#3b3226"/><path d="M226 62 A34 34 0 0 1 294 62" fill="none" stroke="#9c8a66" stroke-width="5"/><rect x="186" y="8" width="148" height="8" fill="#c4b591" stroke="#9c8a66"/><text x="260" y="15" text-anchor="middle" font-family="Georgia,serif" font-size="7.5" letter-spacing="2" fill="#6e5a35">PORTA</text></g>`
+   :`<g><path d="M184 40 L260 8 L336 40 Z" fill="#8a5a3c"/><rect x="192" y="40" width="136" height="64" fill="#e8e2d6" stroke="#b9ae98"/><rect x="212" y="52" width="96" height="52" fill="#9aa5b8"/>${[0,1,2,3,4,5,6].map(k=>`<path d="M212 ${58+k*7} H308" stroke="#7c879b" stroke-width="1.2"/>`).join('')}<text x="260" y="34" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" font-weight="700" letter-spacing="1.5" fill="#fff">GARAGE</text></g>`;
+  return `<svg viewBox="0 0 340 112" width="100%" style="max-width:420px" role="img" aria-label="LexEcôle"><rect x="0" y="104" width="340" height="2" fill="#d9dde6"/>${gate}${nest(veh({label:'LexEcôle',err:0,w:120}),40,48)}</svg>`}
+function renderScene(){const e=$('#scene');if(e)e.innerHTML=gateSVG();const f=$('#scene2');if(f)f.innerHTML=classSVG()}
 function renderCars(){renderScene();const la=LG==='la',S=la?CHARS:CARS,cur=la?CHARK:CARK;$('#cars').innerHTML=Object.keys(S).map(k=>`<button type="button" data-car="${k}" class="${k===cur?'on':''}" aria-label="${k}">${veh({model:k,err:0,w:LG==='la'?52:58,label:UI==='ru'?'У':'L'})}</button>`).join('')}
 function doCompare(){const u=$('#usr').value.trim(),e=$('#e3');e.textContent='';if(!u){e.textContent=t('emptyU');return}if(!/[.!?…]$/.test(u)){e.textContent=t('needDot');$('#c4').classList.add('hidden');return}
   const E=ENG[LG];const prog=E.translate(toks,endP);

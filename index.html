@@ -153,7 +153,7 @@ footer a{color:var(--mut)}
 <li>W. Whitaker, <i>Words</i> (Latin–English) — LexEikôn</li>
 <li>Тананушко, <i>Латинско-русский словарь</i> — LexEikôn</li>
 <li><span data-i="own"></span></li></ul></details>
-<div><button class="upd" id="upd" data-i="upd"></button></div><div>LexEcôle · Sergey Kim · v0.22</div></footer>
+<div><button class="upd" id="upd" data-i="upd"></button></div><div>LexEcôle · Sergey Kim · v0.23</div></footer>
 </div>
 <script src="fr.js"></script>
 <script src="la.js"></script>
@@ -260,7 +260,7 @@ function carSVG(o){const M=CARS[o.model||CARK],n=o.err||0,sh=!n,uid='c'+Math.ran
   ${sh?'<path d="M14 26 L30 24" stroke="#fff" stroke-width="1.5" opacity=".55" stroke-linecap="round"/><g fill="#fff6c2"><path d="M40 1 l1 3 l3 1 l-3 1 l-1 3 l-1 -3 l-3 -1 l3 -1z"/><path d="M78 12 l.7 2 l2 .7 l-2 .7 l-.7 2 l-.7 -2 l-2 -.7 l2 -.7z"/><path d="M10 15 l.6 1.6 l1.6 .6 l-1.6 .6 l-.6 1.6 l-.6 -1.6 l-1.6 -.6 l1.6 -.6z"/></g>':''}
   </svg>`}
 function renderCars(){$('#cars').innerHTML=Object.keys(CARS).map(k=>`<button type="button" data-car="${k}" class="${k===CARK?'on':''}" aria-label="${k}">${carSVG({model:k,err:0,w:58,label:UI==='ru'?'У':'L'})}</button>`).join('')}
-function doCompare(){const u=$('#usr').value.trim(),e=$('#e3');e.textContent='';if(!u){e.textContent=t('emptyU');return}
+function doCompare(){const u=$('#usr').value.trim(),e=$('#e3');e.textContent='';if(!u){e.textContent=t('emptyU');return}if(!/[.!?…]$/.test(u)){e.textContent=t('needDot');$('#c4').classList.add('hidden');return}
   const E=ENG[LG];const prog=E.translate(toks,endP);
   const src=toks.filter(x=>x.c).map(x=>({w:x.w,label:E.label(x.c,UI,x.w),exp:E.expect(x),kind:x.c.pos}));
   const r=CMP.compare(u,prog,src,UI,LG==='la');

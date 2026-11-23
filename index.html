@@ -163,12 +163,12 @@ footer a{color:var(--mut)}
 <li>FreeDict Latein–Deutsch — LexEikôn (GPL)</li>
 <li>W. Whitaker, <i>Words</i> (Latin–English) — LexEikôn</li>
 <li>Тананушко, <i>Латинско-русский словарь</i> — LexEikôn</li>
-<li><span data-i="own"></span></li></ul><div>LexEcôle · Sergey Kim · v0.36</div></footer>
+<li><span data-i="own"></span></li></ul><div>LexEcôle · Sergey Kim · v0.37</div></footer>
 </div>
-<script src="fr.js?v=36"></script>
-<script src="la.js?v=36"></script>
-<script src="de.js?v=36"></script>
-<script src="cmp.js?v=36"></script>
+<script src="fr.js?v=37"></script>
+<script src="la.js?v=37"></script>
+<script src="de.js?v=37"></script>
+<script src="cmp.js?v=37"></script>
 <script>
 'use strict';
 const I18N={
@@ -195,7 +195,7 @@ const LEGSET={la:[['nom subst','verb','nom adj','adv','pron','prep','conj','intr
 function renderLeg(){const L=LEG[UI]||LEG.fr;$('#abbr').innerHTML='<h3>'+L.h+'</h3>'+LEGSET[LG].map((g,k)=>'<div class="grp"><span>'+L.g[k]+'</span>'+g.map(c=>'<i><b>'+c+'</b>'+esc(L.c[c]||'')+'</i>').join('')+'</div>').join('')}
 function applyUI(){document.documentElement.lang=UI;$('#ui').value=UI;$('#tagline').textContent=t('tag');document.title='LexEcôle — '+t('tag');
   document.querySelectorAll('[data-i]').forEach(e=>{const v=t(e.dataset.i);if(typeof v==='string')e.textContent=v});
-  $('#src').placeholder=t('ph1')[LG];$('#usr').placeholder=t('ph3');
+  $('#src').placeholder='';$('#usr').placeholder='';
   document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.l===LG));$('#bde').textContent=UI==='fr'?'Allemand':UI==='en'?'German':UI==='ru'?'Немецкий':'Deutsch';$('#bla').textContent=UI==='ru'?'Латынь':UI==='de'?'Latein':'Latin';
   renderLeg();if(typeof renderCars==='function')renderCars();if(toks.length)renderAna()}
 async function ensure(l){if(loaded[l])return loaded[l];$('#e1').textContent='';const st=$('#e1');st.className='load';st.textContent=t('loading');

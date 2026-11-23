@@ -143,5 +143,14 @@ function adj(a,g,n){a=a.trim();if(INV_ADJ.test(a))return a;let s=a;
     if(irr[s])s=irr[s];else if(/e$/.test(s));else if(/eux$/.test(s))s=s.slice(0,-1)+'se';else if(/eur$/.test(s)&&!/(meilleur|supérieur|inférieur|extérieur|intérieur|majeur|mineur)$/.test(s))s=s.slice(0,-1)+'se';else if(/if$/.test(s))s=s.slice(0,-1)+'ve';else if(/er$/.test(s))s=s.slice(0,-2)+'ère';else if(/(el|eil|en|on|et)$/.test(s)&&!/(complet|secret|inquiet|concret)$/.test(s))s=s+s.slice(-1)+'e';else if(/(complet|secret|inquiet|concret)$/.test(s))s=s.slice(0,-2)+'ète';else s+='e'}
   if(n==='p'){if(/[sx]$/.test(s));else if(/eau$/.test(s))s+='x';else if(/al$/.test(s)&&g!=='f')s=s.slice(0,-2)+'aux';else s+='s'}
   return s}
-return {conj,np,adj,art,plural,genderOf,setFem,BEFORE,elide,PRON,simple,data}})();
+/* questions: variants with inversion, est-ce que, intonation */
+const PRS=/^(je|j'|tu|il|elle|on|nous|vous|ils|elles)\s?/;
+function invPron(v){const m=v.match(PRS);if(!m)return null;const p=m[1]==="j'"?'je':m[1];if(p==='je')return null;const r=v.slice(m[0].length).split(' ');if(/^(ne|n'|me|m'|te|t'|se|s'|le|la|l'|les|lui|leur|nous|vous)$/.test(r[0])||/'/.test(r[0]))return null;const f=r[0];const t=/[ae]$/.test(f)&&/^(il|elle|on)$/.test(p)?'-t-':'-';return [f+t+p,...r.slice(1)].join(' ')}
+function invNP(v,g,n){const r=v.split(' ');if(/^(ne|n'|me|m'|te|t'|se|s'|le|la|l'|les|lui|leur|nous|vous)$/.test(r[0])||/'/.test(r[0]))return null;const p=n==='p'?(g==='f'?'elles':'ils'):(g==='f'?'elle':'il');const f=r[0];const t=/[ae]$/.test(f)&&/^(il|elle)$/.test(p)?'-t-':'-';return [f+t+p,...r.slice(1)].join(' ')}
+function question(o){const wh=o.wh||'',tail=o.tail||'',core=[o.subj,o.vt,tail].filter(Boolean).join(' ');const out=[];
+  const esk=(wh==='que'?"qu'est-ce ":wh?wh+' est-ce ':'est-ce ')+(/^[aeiouyéèêh]/i.test(core)?"qu'"+core:'que '+core);
+  let inv=null;if(o.subj){const iv=invNP(o.vt,o.g,o.n);if(iv)inv=[wh==='que'?null:wh,o.subj,iv,tail].filter(Boolean).join(' ')}else{const iv=invPron(o.vt);if(iv)inv=[wh,iv,tail].filter(Boolean).join(' ')}
+  if(inv&&!(wh==='que'&&o.subj))out.push(inv);out.push(esk);if(!wh)out.push(core);else out.push(core+' '+(wh==='que'?'quoi':wh));
+  return out.map(x=>x.replace(/\s+/g,' ').trim())}
+return {question,conj,np,adj,art,plural,genderOf,setFem,BEFORE,elide,PRON,simple,data}})();
 if(typeof module!=='undefined')module.exports=FR;

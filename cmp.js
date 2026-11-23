@@ -31,7 +31,7 @@ function compare(user,prog,src,ui,grp){w=W[ui]||W.fr;
   for(let i=1;i<=n;i++)for(let j=1;j<=m;j++){const d=S[i-1][j-1]+sim(U[i-1],P[j-1],syns[j-1]),a=S[i-1][j]+G,b=S[i][j-1]+G;if(d>=a&&d>=b){S[i][j]=d;B[i][j]=0}else if(a>=b){S[i][j]=a;B[i][j]=1}else{S[i][j]=b;B[i][j]=2}}
   const cols=[];let i=n,j=m;
   while(i>0||j>0){if(i>0&&j>0&&B[i][j]===0){cols.push({u:U[i-1],p:P[j-1],k:j-1});i--;j--}else if(i>0&&(j===0||B[i][j]===1)){cols.push({u:U[i-1],p:null});i--}else{cols.push({u:null,p:P[j-1],k:j-1});j--}}
-  cols.reverse();{const seen=new Set();for(const c of cols){const s=c.k!=null&&link[c.k];if(s&&!seen.has(s)){c.src=s.w;seen.add(s)}}}
+  cols.reverse();for(const c of cols){const s=c.k!=null&&link[c.k];if(s){c.si=s.i}}
   let errors=0;
   for(const c of cols){
     if(c.u&&c.p){const sc=sim(c.u,c.p,syns[c.k]);

@@ -65,8 +65,10 @@ function label(x,ui,w){if(!x)return ['?','',''];const f=x.f;const j=a=>a.filter(
 const TMAP={pres:'pres',prt:'impf',kj1:'subj',kj2:'cond'};
 const firstSense=g=>(g||'').split(/[,;]/)[0].replace(/\([^)]*\)/g,'').trim();
 function withPrep(p,np){return (p+' '+np).replace(/(^|\s)à le /g,'$1au ').replace(/(^|\s)à les /g,'$1aux ').replace(/(^|\s)de le /g,'$1du ').replace(/(^|\s)de les /g,'$1des ').replace(/(^|\s)de ([aeiouyéèêh])/gi,"$1d'$2").replace(/(^|\s)à l' /,"$1à l'")}
-function translate(toks,end){end=end||'.';
-  const used=new Set();const n=toks.length;
+const WH={wer:'qui',was:'que',wo:'où',wohin:'où',woher:"d'où",wann:'quand',warum:'pourquoi',wieso:'pourquoi',weshalb:'pourquoi',wie:'comment',wieviel:'combien'};
+let VARS=[];
+function translate(toks,end){end=end||'.';VARS=[];const Q=end==='?';let whI=-1,wh='';if(Q){whI=toks.findIndex((t,i)=>i<2&&WH[t.w.toLowerCase()]!==undefined);if(whI>=0)wh=WH[toks[whI].w.toLowerCase()]}const whSubj=whI>=0&&toks[whI].w.toLowerCase()==='wer';
+  const used=new Set();const n=toks.length;if(whI>=0)used.add(whI);
   const fi=toks.findIndex(t=>t.c&&t.c.pos==='VER'&&t.c.f.pers);const fin=fi>=0?toks[fi].c:null;if(fi>=0)used.add(fi);
   /* verb complex */
   let vlem=fin?fin.lem:'',tense=fin?TMAP[fin.f.tense]||'pres':'pres',pass=false,modal=null,inf=null;
@@ -124,11 +126,11 @@ function translate(toks,end){end=end||'.';
     if(x.pos==='ZUS')return;
     rest.push({i,txt:firstSense(x.gloss)||glossOf(x,t.w)||t.w})});
   /* verb text */
-  let vt='';
+  let vt='',vg0='';
   if(fin){const pers=(fin.f.pers||3)-1+(fin.f.num==='p'?3:0);const o={neg,passive:pass,g:sG==='f'?'f':null,n:sN||(fin.f.num==='p'?'p':null),noPron:!!subj};
     if(fin.lem==='sein'&&!modal&&pa2<0&&tense!=='fut')vlem='sein';
     if(fin.f.pers===2&&fin.f.num==='p'&&toks.some(t=>t.w==='Sie'))o.noPron=false;
-    let vg=modal?vglossOf(modal):vglossOf(vlem);if(vlem==='sein')vg='être';if(vlem==='haben')vg='avoir';if(vlem==='werden'&&!pass)vg='devenir';
+    let vg=modal?vglossOf(modal):vglossOf(vlem);vg0=vg;if(vlem==='sein')vg='être';if(vlem==='haben')vg='avoir';if(vlem==='werden'&&!pass)vg='devenir';
     let p2=pers;if(toks.some(t=>t.w==='Sie'&&t.c&&t.c.f.cas==='nom'&&t.i>0||t.w==='Sie'&&t.i===0&&fin.f.num==='p'&&fin.f.pers===3&&false))p2=4;
     vt=FR.conj(vg,tense,p2,o);
     if(clit.length){const cl=clit.join(' ');const m=vt.match(/^(je|j'|tu|il|elle|nous|vous|ils|elles)\s?/);if(m&&!o.noPron){const r=vt.slice(m[0].length);vt=(m[1]==="j'"?'je':m[1])+' '+FR.elide(cl,r)}else vt=FR.elide(cl,vt)}
@@ -136,7 +138,10 @@ function translate(toks,end){end=end||'.';
     if(attr)vt+=' '+attr}
   rest.sort((a,b)=>a.i-b.i);
   let s=[...front,subj&&subj.txt,vt,...objs,...dats,...rest.map(r=>r.txt)].filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
-  return s?s[0].toUpperCase()+s.slice(1)+end:''}
+  const cap=x=>x?x[0].toUpperCase()+x.slice(1)+(end==='?'?' ?':end):'';
+  if(Q&&vt&&whSubj){const v3=FR.conj(vg0||'être',tense,2,{neg,passive:pass,noPron:true});const tl=[...objs,...dats,...rest.map(r=>r.txt)].filter(Boolean).join(' ');VARS=['qui '+v3+' '+tl,'qui est-ce qui '+v3+' '+tl].map(x=>cap(x.replace(/\s+/g,' ').trim()));return VARS[0]}
+  if(Q&&vt){VARS=FR.question({wh,subj:[...front,subj&&subj.txt].filter(Boolean).join(' ')||null,g:sG,n:sN,vt,tail:[...objs,...dats,...rest.map(r=>r.txt)].filter(Boolean).join(' ')}).map(cap);return VARS[0]}
+  return cap(s)}
 function expect(t){const x=t.c;if(!x)return [];const g=x.gloss||'';const a=g.split(/[,;]/).map(s=>s.replace(/\([^)]*\)/g,'').trim()).filter(Boolean);const gl=glossOf(x,t.w);return [...new Set([gl,...a].filter(Boolean))]}
 let BYL=null;function byLemma(){if(BYL)return BYL;BYL=new Map();for(const [w,a] of F)for(const [li,ti] of a){if(!BYL.has(li))BYL.set(li,[]);BYL.get(li).push([w,D.tags[ti]])}return BYL}
 const ART={m:{nom:'der',acc:'den',dat:'dem',gen:'des'},f:{nom:'die',acc:'die',dat:'der',gen:'der'},n:{nom:'das',acc:'das',dat:'dem',gen:'des'},p:{nom:'die',acc:'die',dat:'den',gen:'der'}};
@@ -147,5 +152,5 @@ function table(x,ui){if(!x||x.li<0)return null;const t=THD[ui]||THD.fr,L=byLemma
   if(f.pos==='VER'&&f.pers){const tn=f.tense==='prt'?'prt':'pres';const get=(p,n)=>{const w=[...new Set(L.filter(([,tg])=>{const q=parse(tg);return q.pos==='VER'&&q.pers===p&&q.num===n&&q.tense===tn}).map(([w])=>w))];return w.length?w.join(', '):'—'};
     return {title:t.v+' · '+t[tn],rows:[1,2,3].map(p=>[String(p),get(p,'s'),get(p,'p')]),cols:['sg','pl'],cur:[f.pers-1,f.num==='p'?2:1]}}
   return null}
-return {load,table,analyze,choose,label,translate,expect}})();
+return {variants:()=>VARS,load,table,analyze,choose,label,translate,expect}})();
 if(typeof module!=='undefined')module.exports=DE;

@@ -44,7 +44,7 @@ const PREP_CASE=info=>/\+\s*abl/.test(info)&&/\+\s*acc/.test(info)?'acc|abl':/\+
 /* choose analyses in context */
 function choose(toks){
   for(const t of toks){for(const x of t.a){let s=Math.log(1+(x.freq||0));const F=x.f;
-    if(F.cas==='voc')s-=3;if(F.cas==='loc')s-=3;if(F.mood==='sup')s-=3;if(F.mood==='imp'&&F.tense==='fut')s-=3;if(F.mood==='part'&&F.tense==='fut')s-=1.5;if(F.mood==='adjv')s-=1.5;if(F.mood==='ger')s-=1;if(F.deg)s-=1;if(F.mood==='subj')s-=.8;
+    if(F.cas==='voc')s-=3;if(F.cas==='loc')s-=3;if(F.mood==='sup')s-=3;if(F.mood==='imp'&&F.tense==='fut')s-=3;if(F.mood==='part'&&F.tense==='fut')s-=1.5;if(F.mood==='part')s-=2.5;if(F.mood==='adjv')s-=1.5;if(F.mood==='ger')s-=1;if(F.deg)s-=1;if(F.mood==='subj')s-=.8;
     const lp=/^[A-Z]/.test(x.lem.normalize('NFD').replace(/[\u0300-\u036f]/g,'')),wp=/^[A-Z]/.test(t.w);if(t.i===0){if(lp)s-=1.5}else if(lp!==wp)s-=4;if(lp&&F.num==='p'&&x.pos==='noun')s-=2;if(!x.gloss)s-=4;
     x.base=s}}
   const pick=t=>t.a.length?t.a.reduce((b,x)=>((x.base+(x.bonus||0))>(b.base+(b.bonus||0))?x:b)):null;
@@ -59,7 +59,7 @@ function choose(toks){
       if(F.cas==='acc')b+=0.6;if(F.cas==='dat'&&vb&&/^(do|dico|narro|mitto|ostendo|credo|pareo|impero|persuadeo|faueo|noceo|placeo|respondeo|scribo|monstro|trado|praebeo|dono|nuntio|promitto|reddo)$/.test(norm(vb.lem)))b+=1.2;if(F.cas==='gen'||F.cas==='dat')b-=0.2;
       if((x.pos==='adj'||F.mood==='part')&&F.cas){if(toks.some((u,j)=>j!==i&&u.c&&u.c.pos==='noun'&&u.c.f.cas===F.cas&&u.c.f.num===F.num&&(!u.c.f.gen&&!F.gen||nounGen(u.c)===F.gen||!F.gen)))b+=2.5}
       if(x.pos==='noun'&&F.cas&&toks.some((u,j)=>j!==i&&u.c&&u.c.pos==='adj'&&u.c.f.cas===F.cas&&u.c.f.num===F.num))b+=1;
-      if(x.pos==='verb'&&(F.mood==='ind')&&verbs.length===0)b+=1;
+      if(x.pos==='verb'&&(F.mood==='ind')&&verbs.length===0)b+=3;
       if(F.mood==='inf'&&toks.some(u=>u.c&&/^(possum|uolo|nolo|malo|debeo|cupio|incipio|soleo|audeo|scio|nescio|conor)$/.test(norm(u.c.lem))))b+=3;
       if(F.cas==='nom'&&vb&&t.a.some(y=>y.f.cas==='acc'&&y.li===x.li)&&toks.some((u,j)=>j!==i&&u.c&&u.c.f.cas==='nom'&&!u.a.some(y=>y.f.cas==='acc')&&u.c.f.num===vb.f.num&&(u.c.pos==='noun'||u.c.pos==='adj')))b-=2.5;
       x.bonus=b}})}
@@ -89,15 +89,17 @@ function nounFr(x,o={}){let g=x.subst?bestGloss(x):(ovr(x)||cleanGloss(x.gloss)|
 function adjFr(x,g,n){let a=bestGloss(x);if(/^[A-ZÀ-Ý]/.test(a))a=a[0].toLowerCase()+a.slice(1);return FR.adj(a,g,n)}
 const TENSE_MAP={pres:'pres',impf:'impf',fut:'fut',pf:'pc',pqp:'pqp',fa:'fa'};
 function withPrep(p,np){return (p+' '+np).replace(/(^|\s)à le /g,'$1au ').replace(/(^|\s)à les /g,'$1aux ').replace(/(^|\s)de le /g,'$1du ').replace(/(^|\s)de les /g,'$1des ').replace(/(^|\s)de ([aeiouyéèêh])/gi,"$1d'$2")}
-function translate(toks,end){end=end||'.';
-  const used=new Set(),parts=[];let verb=null,neg=false,subj=null,attr=null,objs=[],dats=[],rest=[],front=[],clitics=[];
+const WH={quis:'qui',quid:'que',ubi:'où',cur:'pourquoi',quando:'quand',quomodo:'comment',unde:"d'où",quo:'où',qualis:'quel',quantus:'combien',num:'',nonne:'',an:''};
+let VARS=[];
+function translate(toks,end){end=end||'.';VARS=[];const Q=end==='?';let whI=-1,wh='';if(Q){const wk=t=>WH[norm(t.w)]!==undefined?norm(t.w):t.c&&WH[norm(t.c.lem).replace(/\d+$/,'')]!==undefined?norm(t.c.lem).replace(/\d+$/,''):null;whI=toks.findIndex(t=>wk(t));if(whI>=0)wh=WH[wk(toks[whI])]}const whSubj=whI>=0&&wh==='qui'&&toks[whI].c&&(toks[whI].c.f.cas==='nom'||!toks[whI].c.f.cas);
+  const used=new Set(),parts=[];if(whI>=0)used.add(whI);let verb=null,neg=false,subj=null,attr=null,objs=[],dats=[],rest=[],front=[],clitics=[];
   const c=i=>toks[i]&&toks[i].c;
   /* noun phrases: head noun + adjectives agreeing + following genitive */
   const vx0=(toks.find(t=>t.c&&t.c.pos==='verb'&&/^(ind|subj|imp)$/.test(t.c.f.mood))||{}).c;
   let pppI=-1;{const vi=toks.findIndex(t=>t.c&&t.c.pos==='verb'&&/^(ind|subj)$/.test(t.c.f.mood)&&norm(t.c.lem)==='sum');if(vi>=0)pppI=toks.findIndex(t=>t.c&&t.c.f.mood==='part'&&t.c.f.tense==='pf'&&t.c.f.cas==='nom')}
   if(pppI>=0)used.add(pppI);
   let attrI=-1;if(vx0&&norm(vx0.lem)==='sum'&&pppI<0){const vi=toks.findIndex(t=>t.c===vx0);let bd=99;toks.forEach((t,i)=>{if(t.c&&t.c.pos==='adj'&&t.c.f.cas==='nom'){const d=Math.abs(i-vi);if(d<bd){bd=d;attrI=i}}})}
-  const NP=[];toks.forEach((t,i)=>{const x=t.c;if(x&&(x.pos==='noun'||(x.pos==='pron'&&x.f.cas))&&!(x.pos==='pron'&&PERS_PRON[norm(x.lem)]!==undefined&&x.f.cas==='nom'))NP.push({i,head:x,adjs:[],gens:[]})});
+  const NP=[];toks.forEach((t,i)=>{const x=t.c;if(i===whI)return;if(x&&(x.pos==='noun'||(x.pos==='pron'&&x.f.cas))&&!(x.pos==='pron'&&PERS_PRON[norm(x.lem)]!==undefined&&x.f.cas==='nom'))NP.push({i,head:x,adjs:[],gens:[]})});
   toks.forEach((t,i)=>{const x=t.c;if(!x||i===pppI||i===attrI)return;if((x.pos==='adj'||(x.f.mood==='part'&&x.f.cas))){let best=null,bd=99;for(const n of NP){if(n.head.f.cas===x.f.cas&&n.head.f.num===x.f.num&&(!x.f.gen||nounGen(n.head)===x.f.gen||!nounGen(n.head))){const d=Math.abs(n.i-i);if(d<bd){bd=d;best=n}}}if(best){best.adjs.push({i,x});used.add(i)}}});
   toks.forEach((t,i)=>{const x=t.c;if(x&&x.pos==='adj'&&x.f.cas&&!used.has(i)&&i!==pppI&&!(vx0&&norm(vx0.lem)==='sum'&&x.f.cas==='nom')){NP.push({i,head:Object.assign({},x,{pos:'noun',subst:true}),adjs:[],gens:[]});used.add(i)}});NP.sort((a,b)=>a.i-b.i);
   for(let k=NP.length-1;k>0;k--){const a=NP[k-1],b=NP[k];const mid=toks.slice(a.i+1+a.adjs.filter(z=>z.i>a.i).length,b.i).filter(t=>!used.has(t.i));if(a.head.f.cas===b.head.f.cas&&(mid.length===1&&mid[0].c&&/^(et|atque|ac)$/.test(norm(mid[0].c.lem))||toks[b.i].enc==='que')){a.coord=(a.coord||[]).concat([b],b.coord||[]);used.add(mid[0]?mid[0].i:-1);NP.splice(k,1)}}
@@ -152,7 +154,10 @@ function translate(toks,end){end=end||'.';
   else if(infTxt)vt=infTxt;
   rest.sort((a,b)=>a.i-b.i);
   let s=[...front,subj&&subj.txt,vt,...objs,...dats,...rest.map(r=>r.txt)].filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
-  s=s.replace(/,\s*$/,'');return s?s[0].toUpperCase()+s.slice(1)+end:''}
+  const cap=x=>x?x[0].toUpperCase()+x.slice(1)+(end==='?'?' ?':end):'';
+  if(Q&&vt&&whSubj){const v3=FR.conj(vgloss||'être',tense,2,{neg,passive:pass,noPron:true});const tl=[...objs,...dats,...rest.map(r=>r.txt)].filter(Boolean).join(' ');VARS=['qui '+v3+' '+tl,'qui est-ce qui '+v3+' '+tl].map(x=>cap(x.replace(/\s+/g,' ').trim()));return VARS[0]}
+  if(Q&&vt){VARS=FR.question({wh,subj:[...front,subj&&subj.txt].filter(Boolean).join(' ')||null,g:sG,n:sN,vt,tail:[...objs,...dats,...rest.map(r=>r.txt)].filter(Boolean).join(' ')}).map(cap);return VARS[0]}
+  s=s.replace(/,\s*$/,'');return cap(s)}
 /* expected French words per source token (for comparison) */
 function expect(t){const x=t.c;if(!x)return [];const o=ovr(x);return [...new Set([o,...senses(x.gloss)].filter(Boolean))].slice(0,8)}
 /* ending tables */
@@ -173,5 +178,5 @@ function table(x,ui){if(!x)return null;const t=TH[ui]||TH.fr,P=D.par[x.L[1]],lem
     if(start==null)return null;const lab=label(x,ui)[1].replace(/(\s·)?\s*\d(sg|pl)$/,'');
     return {title:t.v+(cl?' '+t.conj(cl.n):'')+' · '+lab,rows:[1,2,3].map(p=>[String(p),end(start+p-1),end(start+p+2)]),cols:['sg','pl'],cur:[(x.mo-start)%3,x.mo-start>=3?2:1]}}
   return null}
-return {load,table,analyze:analyzeTok,choose,label,translate,expect,norm,cleanGloss,senses}})();
+return {variants:()=>VARS,load,table,analyze:analyzeTok,choose,label,translate,expect,norm,cleanGloss,senses}})();
 if(typeof module!=='undefined')module.exports=LA;

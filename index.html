@@ -23,6 +23,7 @@ h1 span{font-style:italic}
 .seg{display:flex;margin:14px auto 18px;max-width:360px;border:1.5px solid var(--acc);border-radius:12px;overflow:hidden}
 .seg button{flex:1;border:0;background:#fff;color:var(--acc);font:600 16px var(--sans);padding:11px 0;cursor:pointer}
 .seg button.on{background:var(--acc);color:#fff}
+.scene{display:flex;justify-content:center;margin:12px 0 0}
 .cars{display:flex;justify-content:center;gap:2px;flex-wrap:nowrap;margin:-6px auto 16px;max-width:420px}
 .cars button{border:1.5px solid transparent;background:transparent;border-radius:12px;padding:3px 3px 0;cursor:pointer;line-height:0}
 .cars button.on{border-color:var(--lap);background:#fff}
@@ -72,7 +73,14 @@ textarea:focus{outline:2px solid rgba(29,58,158,.2);border-color:var(--acc)}
 .dbody .src{font:11px var(--sans);color:var(--mut);margin-top:4px}
 .prog{font:italic 18px/1.4 var(--serif);color:var(--mut)}
 /* correction */
-table.cmp{border-collapse:separate;border-spacing:8px 0;margin:0 0 14px -8px}
+table.cmp{border-collapse:separate;border-spacing:8px 0;margin:0 0 6px -8px}
+.cmpx{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.cmpin{position:relative;display:inline-block;min-width:100%}
+svg.arrows{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+td.srcl{text-align:left!important}
+.srcw{display:flex;gap:14px;font:22px/1.2 var(--serif);color:var(--ink);white-space:nowrap}
+.srcw .pun{margin-left:1px}
+td.arr{height:58px}
 table.cmp td{text-align:center;vertical-align:bottom;white-space:nowrap;padding:0}
 table.cmp td.lab{width:24px;padding:0;vertical-align:middle;border-right:1px solid var(--line)}
 table.cmp td.lab.carl{width:86px;vertical-align:middle;padding-right:4px}
@@ -102,6 +110,7 @@ footer a{color:var(--mut)}
 .frow{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:4px 0 8px}.datl{list-style:none;padding:0;margin:4px auto 10px;max-width:520px;text-align:left}.datl li{padding:4px 0;border-top:1px solid var(--line)}.upd{margin:0;border:1px solid var(--line);background:#fff;color:var(--lap);font:600 12.5px var(--sans);border-radius:14px;padding:4px 14px;cursor:pointer}.dat summary{cursor:pointer;display:inline-block;font:600 12.5px var(--sans);color:var(--acc);list-style:none;border:1px solid var(--line);border-radius:14px;padding:3px 12px;background:#fff}.dat summary::-webkit-details-marker{display:none}.dat ul{list-style:none;padding:0;margin:8px auto 4px;max-width:520px;text-align:left}.dat li{padding:4px 0;border-top:1px solid var(--line)}
 .load{font:13px var(--sans);color:var(--mut)}
 @media(min-width:900px){.one{flex-wrap:nowrap;justify-content:space-between;gap:24px}.one .ana{flex:1 1 auto}.tb{flex:0 0 380px;width:380px;margin-left:auto;font-size:14px}.tb td{font-size:16px}.tb .th{font-size:14px}.w .a{font-size:13.5px}.w .f{font-size:26px}}
+@media(max-width:600px){.cmp .u{font-size:22px;height:32px}.cmp td.pg{font-size:15px;height:60px}.cmp .fx{font-size:14px}.srcw{font-size:19px;gap:10px}table.cmp td.lab.carl{width:60px}table.cmp td.lab.carl svg{width:58px;height:29px}td.arr{height:50px}}
 @media(max-width:420px){h1{font-size:34px}.w{max-width:120px}.w .f{font-size:20px}}
 </style>
 </head>
@@ -120,6 +129,7 @@ footer a{color:var(--mut)}
   <div class="hint" data-i="h1"></div>
   <div class="err" id="e1"></div>
   <div class="row"><button class="btn" id="go" data-i="go"></button></div>
+  <div class="scene" id="scene"></div>
 </section>
 
 <section class="card hidden" id="c2">
@@ -152,7 +162,7 @@ footer a{color:var(--mut)}
 <li>FreeDict Latein–Deutsch — LexEikôn (GPL)</li>
 <li>W. Whitaker, <i>Words</i> (Latin–English) — LexEikôn</li>
 <li>Тананушко, <i>Латинско-русский словарь</i> — LexEikôn</li>
-<li><span data-i="own"></span></li></ul><div>LexEcôle · Sergey Kim · v0.24</div></footer>
+<li><span data-i="own"></span></li></ul><div>LexEcôle · Sergey Kim · v0.27</div></footer>
 </div>
 <script src="fr.js"></script>
 <script src="la.js"></script>
@@ -258,22 +268,91 @@ function carSVG(o){const M=CARS[o.model||CARK],n=o.err||0,sh=!n,uid='c'+Math.ran
   ${wheel(M.w[0],n>=2)}${wheel(M.w[1],n>=1)}
   ${sh?'<path d="M14 26 L30 24" stroke="#fff" stroke-width="1.5" opacity=".55" stroke-linecap="round"/><g fill="#fff6c2"><path d="M40 1 l1 3 l3 1 l-3 1 l-1 3 l-1 -3 l-3 -1 l3 -1z"/><path d="M78 12 l.7 2 l2 .7 l-2 .7 l-.7 2 l-.7 -2 l-2 -.7 l2 -.7z"/><path d="M10 15 l.6 1.6 l1.6 .6 l-1.6 .6 l-.6 1.6 l-.6 -1.6 l-1.6 -.6 l1.6 -.6z"/></g>':''}
   </svg>`}
-function renderCars(){$('#cars').innerHTML=Object.keys(CARS).map(k=>`<button type="button" data-car="${k}" class="${k===CARK?'on':''}" aria-label="${k}">${carSVG({model:k,err:0,w:58,label:UI==='ru'?'У':'L'})}</button>`).join('')}
+/* chariots */
+/* chariots for Latin */
+const CHARS={
+ biga:{h:2,body:'#b07a3a',hi:'#e0b26e',dk:'#6e4718',sp:6,horse:'#7a4b2a',plume:''},
+ quadriga:{h:4,body:'#c9a227',hi:'#f3db7a',dk:'#8a6b0c',sp:8,horse:'#5a3a22',plume:'#b02a1f'},
+ graeca:{h:2,body:'#8a5a32',hi:'#c08a5c',dk:'#553519',sp:4,horse:'#9a9a9a',plume:'#1d3a9e',shield:true},
+ triumphus:{h:4,body:'#6b2b7a',hi:'#a76bb5',dk:'#40164a',sp:8,horse:'#f1efe8',plume:'#c9a227',laurel:true},
+ plaustrum:{cart:true,h:1,body:'#9a6b3c',hi:'#c99a66',dk:'#5e3d1c',horse:'#8a6a4a'},
+ navis:{ship:true,body:'#7a4b2a',hi:'#b07a4a',dk:'#4a2a14',sail:'#efe3c4',stripe:'#b02a1f'}};
+let CHARK=LS.get('char','biga');if(!CHARS[CHARK])CHARK='biga';
+function horse(x,y,col,plume,limp){const leg=limp?'L28 31 L26 31 L27 21':'L30 33 L27.5 33 L28 21';return `<g transform="translate(${x},${y})"><path d="M2 12 q-6 3 -5 13" stroke="#3a2a1e" stroke-width="2" fill="none"/><path d="M0 16 Q2 9 10 8 L23 8 Q27 2 33 0 L38 -1 L41 3 L37 5.5 L34 10 L33 18 ${leg} L15 21 L13 33 L10.5 33 L11 21 Q4 21 2 26 L0 26 Z" fill="${col}" stroke="#2a1c12" stroke-width=".6"/>${plume?`<path d="M34 0 q1 -6 5 -7" stroke="${plume}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`:''}<circle cx="36" cy="2.5" r=".9" fill="#111"/></g>`}
+function ox(x,y,col,limp){return `<g transform="translate(${x},${y})"><path d="M0 14 Q1 7 9 7 L28 7 Q31 4 35 5 L41 7 L42 12 L36 14 L34 20 L33 31 L30.5 31 ${limp?'L30 22':'L31 21'} L14 21 L13 31 L10.5 31 L11 21 Q3 21 1 24 L0 24 Z" fill="${col}" stroke="#2a1c12" stroke-width=".6"/><path d="M35 5 q2 -5 6 -5 M38 5 q4 -3 7 -1" stroke="#e8e0c8" stroke-width="1.6" fill="none"/><circle cx="38" cy="8.5" r=".9" fill="#111"/><path d="M1 12 q-4 2 -3 10" stroke="#2a1c12" stroke-width="1.6" fill="none"/></g>`}
+function cartSVG(o,M,n,sh,uid){const cx=28,cy=44,r=12;const body=n>=6?'#8d8a82':M.body;
+  const wheel=n>=2?`<ellipse cx="${cx}" cy="${cy+4}" rx="${r}" ry="${r*.55}" fill="#6e4718" stroke="#3a2a1e" stroke-width="2"/><path d="M${cx-8} ${cy+2} l16 4" stroke="#2a1c12" stroke-width="1.4"/>`:`<circle cx="${cx}" cy="${cy}" r="${r}" fill="#8a5a2c" stroke="#3a2a1e" stroke-width="2.4"/><circle cx="${cx}" cy="${cy}" r="3" fill="#3a2a1e"/><path d="M${cx-r+2} ${cy} h${2*r-4}" stroke="#5e3d1c" stroke-width="1"/>${n>=1?`<path d="M${cx+2} ${cy-r+1} l3 6 l-2 3 l3 4" stroke="#fff" stroke-width=".9" fill="none"/>`:''}`;
+  const sign=o.label==='LexEcôle'?`<text x="28" y="33" text-anchor="middle" font-family="Georgia,serif" font-size="7.5" font-style="italic" font-weight="700" fill="#fff">LexEcôle</text>`:o.label?`<rect x="23" y="22" width="11" height="11" rx="1.5" fill="#fff" stroke="#13265c" stroke-width=".8"/><text x="28.5" y="31" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" font-weight="700" fill="#1d3a9e">${o.label}</text>`:'';
+  return `${n>=6?'<g fill="#c9c2b2" opacity=".75"><circle cx="8" cy="50" r="5"/><circle cx="2" cy="44" r="3.5"/></g>':''}${n>=4?'':ox(66,15,M.horse,false)}${n>=4?ox(70,15,M.horse,true):''}
+  <path d="M46 36 L70 30" stroke="#5a3a22" stroke-width="2.4"/>${n>=3?'':'<path d="M70 24 Q58 22 48 22" stroke="#3a2a1e" stroke-width="1" fill="none"/>'}
+  <path d="M4 18 L50 18 L48 38 L6 38 Z" fill="url(#${uid})" stroke="#2a1c12" stroke-width=".8"/><path d="M6 24 H48 M6 31 H48" stroke="${M.dk}" stroke-width=".7"/>
+  ${sh?'<g fill="#e9d28a"><ellipse cx="14" cy="16" rx="5" ry="3"/><ellipse cx="22" cy="15" rx="5" ry="3"/><ellipse cx="30" cy="16" rx="5" ry="3"/></g>':''}
+  ${n>=5?'<path d="M18 19 l5 8 l-3 3 l4 7" stroke="#2a1c12" stroke-width=".9" fill="none"/>':''}${sign}${wheel}`}
+function shipSVG(o,M,n,sh,uid){const body=n>=6?'#8d8a82':M.body;const oars=[];for(let k=0;k<7;k++){const x=22+k*10;const br=(n>=1&&k===2)||(n>=3&&(k===4||k===5));oars.push(br?`<path d="M${x} 40 l-3 6" stroke="#6e4718" stroke-width="1.6"/>`:`<path d="M${x} 40 l-6 14" stroke="#6e4718" stroke-width="1.6"/>`)}
+  const sign=o.label==='LexEcôle'?`<text x="60" y="38" text-anchor="middle" font-family="Georgia,serif" font-size="8" font-style="italic" font-weight="700" fill="#fff">LexEcôle</text>`:o.label?`<rect x="54" y="29" width="11" height="11" rx="1.5" fill="#fff" stroke="#13265c" stroke-width=".8"/><text x="59.5" y="38" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" font-weight="700" fill="#1d3a9e">${o.label}</text>`:'';
+  const mast=n>=4?'<line x1="58" y1="30" x2="70" y2="6" stroke="#5e3d1c" stroke-width="2.2"/>':'<line x1="58" y1="30" x2="58" y2="3" stroke="#5e3d1c" stroke-width="2.2"/>';
+  const sail=n>=4?'<path d="M60 8 L80 14 L74 26 L62 24 Z" fill="'+M.sail+'" stroke="#8a7a5a" stroke-width=".6"/>':`<path d="M42 5 L74 5 L72 27 L44 27 Z" fill="${M.sail}" stroke="#8a7a5a" stroke-width=".6"/><path d="M43 12 H73 M43 19 H73" stroke="${M.stripe}" stroke-width="2"/>${n>=2?'<path d="M50 9 l6 8 l-4 3 l7 5" stroke="#8a7a5a" stroke-width="1.2" fill="#fff"/>':''}`;
+  return `<path d="M0 52 q8 -4 16 0 t16 0 t16 0 t16 0 t16 0 t16 0 t16 0 t16 0" stroke="#7fa7d6" stroke-width="1.6" fill="none"/>${oars.join('')}
+  <path d="M6 28 L112 28 Q108 42 94 44 L20 44 Q10 42 6 28 Z" fill="url(#${uid})" stroke="#2a1c12" stroke-width=".8"/><path d="M112 28 q6 -6 4 -12" stroke="${M.dk}" stroke-width="2.4" fill="none"/><path d="M6 28 q-4 -4 -2 -9" stroke="${M.dk}" stroke-width="2" fill="none"/><circle cx="104" cy="34" r="2" fill="#fff"/><circle cx="104" cy="34" r=".9" fill="#111"/>
+  ${mast}${sail}${n>=5?'<path d="M30 30 l5 6 l-3 3 l4 5" stroke="#2a1c12" stroke-width=".9" fill="none"/>':''}${n>=6?'<g fill="#9aa0aa" opacity=".7"><circle cx="64" cy="4" r="4"/><circle cx="70" cy="0" r="3"/></g>':''}${sign}`}
+function chariotSVG(o){const M=CHARS[o.model||CHARK],n=o.err||0,sh=!n,uid='h'+Math.random().toString(36).slice(2,7);
+  if(M.cart||M.ship){const body=n>=6?'#8d8a82':M.body;return `<svg class="car" viewBox="0 0 120 60" width="${o.w||84}" height="${(o.w||84)/2}"><defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sh?M.hi:body}"/><stop offset=".6" stop-color="${body}"/><stop offset="1" stop-color="${M.dk}"/></linearGradient></defs>${M.cart?cartSVG(o,M,n,sh,uid):shipSVG(o,M,n,sh,uid)}${sh?'<g fill="#fff6c2"><path d="M44 2 l1 3 l3 1 l-3 1 l-1 3 l-1 -3 l-3 -1 l3 -1z"/><path d="M6 8 l.7 2 l2 .7 l-2 .7 l-.7 2 l-.7 -2 l-2 -.7 l2 -.7z"/></g>':''}</svg>`}
+  const nh=n>=4?Math.max(1,M.h-1):M.h,horses=[];for(let k=nh-1;k>=0;k--)horses.push(horse(62+k*6,14-k*1.5,M.horse,M.plume,n>=4&&k===0));
+  const cx=26,cy=44,r=13;let wheel='';
+  if(n>=2){wheel=`<ellipse cx="${cx}" cy="${cy+4}" rx="${r}" ry="${r*.55}" fill="none" stroke="#3a2a1e" stroke-width="2.4" stroke-dasharray="${r*4} 6"/><path d="M${cx-8} ${cy+2} l16 4 M${cx-3} ${cy-2} l6 12" stroke="#3a2a1e" stroke-width="1.6"/>`}
+  else{const sp=[];for(let k=0;k<M.sp;k++){if(n>=1&&k===1)continue;const a=Math.PI*2*k/M.sp;sp.push(`<line x1="${cx}" y1="${cy}" x2="${(cx+Math.cos(a)*r).toFixed(1)}" y2="${(cy+Math.sin(a)*r).toFixed(1)}" stroke="#3a2a1e" stroke-width="1.4"/>`)}
+    wheel=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#3a2a1e" stroke-width="2.6"/>${sp.join('')}<circle cx="${cx}" cy="${cy}" r="2.4" fill="${sh?'#f3db7a':'#6e4718'}"/>${n>=1?`<path d="M${cx+r-3} ${cy-6} l4 3 l-3 2" stroke="#fff" stroke-width=".9" fill="none"/>`:''}`}
+  const body=n>=6?'#8d8a82':M.body;
+  const sign=o.label==='LexEcôle'?`<text x="25" y="27" text-anchor="middle" font-family="Georgia,serif" font-size="7.5" font-style="italic" font-weight="700" fill="#fff">LexEcôle</text>`:o.label?`<rect x="20" y="18" width="11" height="11" rx="1.5" fill="#fff" stroke="#13265c" stroke-width=".8"/><text x="25.5" y="27" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" font-weight="700" fill="#1d3a9e">${o.label}</text>`:'';
+  return `<svg class="car" viewBox="0 0 120 60" width="${o.w||84}" height="${(o.w||84)/2}" aria-label="${o.label||''}"><defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sh?M.hi:body}"/><stop offset=".6" stop-color="${body}"/><stop offset="1" stop-color="${M.dk}"/></linearGradient></defs>
+  ${n>=6?'<g fill="#c9c2b2" opacity=".75"><circle cx="8" cy="50" r="5"/><circle cx="2" cy="44" r="3.5"/><circle cx="14" cy="54" r="3"/></g>':''}
+  ${horses.join('')}
+  <path d="M40 40 L64 34" stroke="#5a3a22" stroke-width="2.2"/>
+  <path d="M${n>=3?'60 26 q-8 4 -14 2':'66 24 Q52 22 44 20'}" stroke="#3a2a1e" stroke-width="1" fill="none" ${n>=3?'stroke-dasharray="3 2"':''}/>
+  <path d="M8 20 Q8 16 12 16 L40 18 Q44 19 43 24 L40 42 L10 42 Q6 42 7 37 Z" fill="url(#${uid})" stroke="#2a1c12" stroke-width=".8"/>
+  ${M.shield?'<circle cx="11" cy="30" r="6" fill="#c9a227" stroke="#6e4718" stroke-width=".8"/>':''}
+  ${M.laurel?'<path d="M14 18 q11 -6 22 0" stroke="#3f7d3a" stroke-width="2" fill="none" stroke-dasharray="2 1.5"/>':''}
+  ${n>=5?'<path d="M14 24 l6 6 l-2 3 l5 4" stroke="#2a1c12" stroke-width=".9" fill="none"/>':''}
+  ${sign}${wheel}
+  ${sh?'<path d="M12 21 L30 20" stroke="#fff" stroke-width="1.5" opacity=".55" stroke-linecap="round"/><g fill="#fff6c2"><path d="M44 6 l1 3 l3 1 l-3 1 l-1 3 l-1 -3 l-3 -1 l3 -1z"/><path d="M6 10 l.7 2 l2 .7 l-2 .7 l-.7 2 l-.7 -2 l-2 -.7 l2 -.7z"/></g>':''}
+  </svg>`}
+function veh(o){return LG==='la'?chariotSVG(o):carSVG(o)}
+/* classroom: LexEcôle's car teaches the pupil's car at the blackboard */
+function classSVG(){const lines=LG==='de'?['ich bin','du bist','er ist']:['amo','amas','amat'];
+  const nest=(svg,x,y)=>`<g transform="translate(${x},${y})">${svg}</g>`;
+  return `<svg viewBox="0 0 340 112" width="100%" style="max-width:420px" role="img" aria-label="LexEcôle">
+  <rect x="0" y="104" width="340" height="2" fill="#d9dde6"/>
+  <g><rect x="236" y="6" width="100" height="70" rx="3" fill="#2f5d46" stroke="#8a6a3c" stroke-width="4"/><line x1="250" y1="76" x2="246" y2="104" stroke="#8a6a3c" stroke-width="3"/><line x1="322" y1="76" x2="326" y2="104" stroke="#8a6a3c" stroke-width="3"/>
+  ${lines.map((l,i)=>`<text x="250" y="${28+i*17}" font-family="Georgia,serif" font-style="italic" font-size="14" fill="#f2f2ea">${l}</text>`).join('')}<rect x="300" y="68" width="14" height="4" rx="1" fill="#fff"/></g>
+  <line x1="214" y1="62" x2="262" y2="${45}" stroke="#8a6a3c" stroke-width="2.2" stroke-linecap="round"/>
+  ${nest(veh({label:'LexEcôle',err:0,w:110}),112,50)}
+  ${nest(veh({label:UI==='ru'?'У':'L',err:0,w:96}),2,58)}
+  </svg>`}
+function renderScene(){const e=$('#scene');if(e)e.innerHTML=classSVG()}
+function renderCars(){renderScene();const la=LG==='la',S=la?CHARS:CARS,cur=la?CHARK:CARK;$('#cars').innerHTML=Object.keys(S).map(k=>`<button type="button" data-car="${k}" class="${k===cur?'on':''}" aria-label="${k}">${veh({model:k,err:0,w:LG==='la'?52:58,label:UI==='ru'?'У':'L'})}</button>`).join('')}
 function doCompare(){const u=$('#usr').value.trim(),e=$('#e3');e.textContent='';if(!u){e.textContent=t('emptyU');return}if(!/[.!?…]$/.test(u)){e.textContent=t('needDot');$('#c4').classList.add('hidden');return}
   const E=ENG[LG];const prog=E.translate(toks,endP);
-  const src=toks.filter(x=>x.c).map(x=>({w:x.w,label:E.label(x.c,UI,x.w),exp:E.expect(x),kind:x.c.pos}));
-  const r=CMP.compare(u,prog,src,UI,LG==='la');
+  const src=toks.filter(x=>x.c).map(x=>({i:x.i,w:x.w,label:E.label(x.c,UI,x.w),exp:E.expect(x),kind:x.c.pos}));
+  let r=CMP.compare(u,prog,src,UI,LG==='la');for(const v of (E.variants&&E.variants())||[]){const r2=CMP.compare(u,v,src,UI,LG==='la');if(r2.errors<r.errors)r=r2}
   $('#score').className='score '+(r.errors?'bad':'good');$('#retryr').classList.toggle('hidden',!r.errors);$('#score').textContent=r.errors?t('nErr')(r.errors):t('allOk');
-  $('#c4').classList.remove('hidden');const C=r.cols;const box=$('#cmp');const CAR=true;
-  const tbl=cs=>{const row=f=>cs.map(f).join('');return `<table class="cmp"><tr><td class="lab"></td>${row(c=>`<td class="src">${c.src?esc(c.src):''}</td>`)}</tr><tr><td class="lab"></td>${row(c=>`<td class="ar">${c.src?'↓':''}</td>`)}</tr><tr><td class="lab${CAR?' carl':''}" rowspan="2">${CAR?carSVG({label:UI==='ru'?'У':'L',err:r.errors}):`<div>${esc(t('yours'))}</div>`}</td>${row(c=>`<td class="${c.ok?'ok':''}"><div class="fx">${c.ok?'✓':c.fix?esc(c.fix):''}</div><div class="why">${!c.ok&&c.why?esc(c.why):''}</div></td>`)}</tr><tr>${row(c=>`<td class="u ${c.ok?'':c.missing?'miss':c.extra?'bad extra':'bad'}">${c.u?esc(c.u):(c.missing?'‸':'')}</td>`)}</tr><tr><td class="lab${CAR?' carl':''}">${CAR?carSVG({label:'LexEcôle',err:0}):`<div>${esc(t('mine'))}</div>`}</td>${row(c=>`<td class="pg">${c.p?esc(c.p):''}</td>`)}</tr></table>`};
-  box.innerHTML=tbl(C);
-  {const T=box.querySelector('table'),W=box.clientWidth,cells=[...T.rows[3].cells],lw=T.rows[0].cells[0].offsetWidth+10;const ws=C.map((c,k)=>Math.max(cells[k].offsetWidth,T.rows[0].cells[k+1].offsetWidth,T.rows[2].cells[k+1].offsetWidth,T.rows[4].cells[k+1].offsetWidth)+10);
-   const groups=[];let cur=[],acc=lw;C.forEach((c,k)=>{if(cur.length&&acc+ws[k]>W){groups.push(cur);cur=[];acc=lw}cur.push(c);acc+=ws[k]});if(cur.length)groups.push(cur);
-   if(groups.length>1)box.innerHTML=groups.map(tbl).join('')}
-  $('#c4').classList.remove('hidden');$('#c4').scrollIntoView({behavior:'smooth',block:'start'})}
+  $('#c4').classList.remove('hidden');const C=r.cols;const box=$('#cmp');const CAR=true;const n=C.length;
+  const row=f=>C.map(f).join('');
+  const srcW=toks.map((x,i)=>`<span data-s="${x.i}">${esc(x.w)}${x.enc?'<span style="color:var(--mut)">-'+x.enc+'</span>':''}${i===toks.length-1?'<span class="pun">'+esc(endP)+'</span>':''}</span>`).join('');
+  box.innerHTML=`<div class="cmpx"><div class="cmpin"><table class="cmp"><tr><td class="lab"></td><td colspan="${n}" class="srcl"><div class="srcw">${srcW}</div></td></tr><tr><td class="lab"></td><td colspan="${n}" class="arr"></td></tr><tr><td class="lab carl" rowspan="2">${veh({label:UI==='ru'?'У':'L',err:r.errors})}</td>${row((c,k)=>`<td class="${c.ok?'ok':''}" data-k="${k}"><div class="fx">${c.ok?'✓':c.fix?esc(c.fix):''}</div><div class="why">${!c.ok&&c.why?esc(c.why):''}</div></td>`)}</tr><tr>${row(c=>`<td class="u ${c.ok?'':c.missing?'miss':c.extra?'bad extra':'bad'}">${c.u?esc(c.u):(c.missing?'‸':'')}</td>`)}</tr><tr><td class="lab carl">${veh({label:'LexEcôle',err:0})}</td>${row(c=>`<td class="pg">${c.p?esc(c.p):''}</td>`)}</tr></table><svg class="arrows"></svg></div></div>`;
+  LASTC=C;drawArrows(box,C);$('#c4').scrollIntoView({behavior:'smooth',block:'start'})}
+let LASTC=null;
+function drawArrows(box,C){const inn=box.querySelector('.cmpin'),sv=inn.querySelector('svg.arrows');const R=inn.getBoundingClientRect();
+  sv.setAttribute('width',inn.scrollWidth);sv.setAttribute('height',inn.scrollHeight);sv.setAttribute('viewBox',`0 0 ${inn.scrollWidth} ${inn.scrollHeight}`);
+  const pairs=[];C.forEach((c,k)=>{if(c.si==null)return;const a=inn.querySelector(`.srcw [data-s="${c.si}"]`),b=inn.querySelector(`td[data-k="${k}"]`);if(!a||!b)return;const ra=a.getBoundingClientRect(),rb=b.getBoundingClientRect();
+    pairs.push({o:toks.findIndex(x=>x.i===c.si),x1:ra.left+ra.width/2-R.left,y1:ra.bottom-R.top+3,x2:rb.left+rb.width/2-R.left,y2:rb.top-R.top+1})});
+  pairs.sort((a,b)=>b.o-a.o||b.x2-a.x2);
+  let h='<defs><marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#7d879a"/></marker></defs>';
+  for(const p of pairs){const my=(p.y1+p.y2)/2,d=`M${p.x1} ${p.y1} C${p.x1} ${my} ${p.x2} ${my} ${p.x2} ${p.y2}`;h+=`<path d="${d}" stroke="#fff" stroke-width="6" fill="none"/><path d="${d}" stroke="#7d879a" stroke-width="1.5" fill="none" marker-end="url(#ah)"/>`}
+  sv.innerHTML=h}
 $('#cmpb').addEventListener('click',doCompare);
+let rzT;window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{if(!$('#c4').classList.contains('hidden')&&LASTC)drawArrows($('#cmp'),LASTC)},150)});
 $('#datb').addEventListener('click',()=>$('#datl').classList.toggle('hidden'));
-$('#cars').addEventListener('click',e=>{const b=e.target.closest('button[data-car]');if(!b)return;CARK=b.dataset.car;LS.set('car',CARK);renderCars();if(!$('#c4').classList.contains('hidden'))doCompare()});
+$('#cars').addEventListener('click',e=>{const b=e.target.closest('button[data-car]');if(!b)return;if(LG==='la'){CHARK=b.dataset.car;LS.set('char',CHARK)}else{CARK=b.dataset.car;LS.set('car',CARK)}renderCars();if(!$('#c4').classList.contains('hidden'))doCompare()});
 $('#retry').addEventListener('click',()=>{$('#c4').classList.add('hidden');const u=$('#usr');$('#c3').scrollIntoView({behavior:'smooth',block:'start'});u.focus();try{u.setSelectionRange(u.value.length,u.value.length)}catch(e){}});
 $('#upd').addEventListener('click',async()=>{try{if(window.caches){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}}catch(e){}location.replace(location.pathname+'?u='+Date.now())});
 if(/[?&]u=/.test(location.search))try{history.replaceState(null,'',location.pathname)}catch(e){}

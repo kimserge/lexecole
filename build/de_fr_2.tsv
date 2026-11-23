@@ -1,0 +1,344 @@
+Mann	homme
+Frau	femme
+Kind	enfant
+Junge	garçon
+Mädchen	fille
+Mensch	être humain
+Leute	gens
+Person	personne
+Familie	famille
+Vater	père
+Mutter	mère
+Eltern	parents
+Sohn	fils
+Tochter	fille
+Bruder	frère
+Schwester	sœur
+Geschwister	frères et sœurs
+Großvater	grand-père
+Großmutter	grand-mère
+Oma	mamie
+Opa	papi
+Onkel	oncle
+Tante	tante
+Freund	ami
+Freundin	amie
+Nachbar	voisin
+Gast	invité
+Lehrer	professeur
+Lehrerin	professeure
+Schüler	élève
+Schülerin	élève
+Student	étudiant
+Arzt	médecin
+Bauer	paysan
+König	roi
+Königin	reine
+Prinz	prince
+Prinzessin	princesse
+Ritter	chevalier
+Soldat	soldat
+Herr	monsieur, maître
+Dame	dame
+Name	nom
+Kopf	tête
+Gesicht	visage
+Auge	œil
+Ohr	oreille
+Nase	nez
+Mund	bouche
+Zahn	dent
+Haar	cheveu
+Hals	cou
+Arm	bras
+Hand	main
+Finger	doigt
+Bein	jambe
+Fuß	pied
+Herz	cœur
+Bauch	ventre
+Rücken	dos
+Körper	corps
+Haus	maison
+Wohnung	appartement
+Zimmer	chambre, pièce
+Küche	cuisine
+Tür	porte
+Fenster	fenêtre
+Wand	mur
+Dach	toit
+Garten	jardin
+Tisch	table
+Stuhl	chaise
+Bett	lit
+Schrank	armoire
+Lampe	lampe
+Bild	image, tableau
+Buch	livre
+Heft	cahier
+Stift	crayon
+Papier	papier
+Brief	lettre
+Zeitung	journal
+Schule	école
+Klasse	classe
+Unterricht	cours
+Stunde	heure, leçon
+Aufgabe	exercice, tâche
+Frage	question
+Antwort	réponse
+Wort	mot
+Satz	phrase
+Sprache	langue
+Text	texte
+Geschichte	histoire
+Prüfung	examen
+Note	note
+Fehler	faute
+Stadt	ville
+Dorf	village
+Land	pays, campagne
+Straße	rue
+Weg	chemin
+Platz	place
+Markt	marché
+Kirche	église
+Brücke	pont
+Bahnhof	gare
+Zug	train
+Auto	voiture
+Bus	bus
+Fahrrad	vélo
+Schiff	bateau
+Flugzeug	avion
+Welt	monde
+Erde	terre
+Himmel	ciel
+Sonne	soleil
+Mond	lune
+Stern	étoile
+Wetter	temps (météo)
+Regen	pluie
+Schnee	neige
+Wind	vent
+Wolke	nuage
+Natur	nature
+Wald	forêt
+Baum	arbre
+Blume	fleur
+Gras	herbe
+Berg	montagne
+Tal	vallée
+Fluss	rivière, fleuve
+See	lac, mer
+Meer	mer
+Insel	île
+Wasser	eau
+Feuer	feu
+Luft	air
+Stein	pierre
+Tier	animal
+Hund	chien
+Katze	chat
+Pferd	cheval
+Kuh	vache
+Schwein	cochon
+Vogel	oiseau
+Fisch	poisson
+Maus	souris
+Wolf	loup
+Bär	ours
+Fuchs	renard
+Löwe	lion
+Essen	repas, nourriture
+Brot	pain
+Butter	beurre
+Käse	fromage
+Fleisch	viande
+Wurst	saucisse
+Ei	œuf
+Milch	lait
+Kaffee	café
+Tee	thé
+Saft	jus
+Apfel	pomme
+Obst	fruits
+Gemüse	légumes
+Kartoffel	pomme de terre
+Suppe	soupe
+Kuchen	gâteau
+Zucker	sucre
+Salz	sel
+Frühstück	petit-déjeuner
+Mittagessen	déjeuner
+Abendessen	dîner
+Zeit	temps
+Tag	jour
+Nacht	nuit
+Morgen	matin
+Mittag	midi
+Abend	soir
+Woche	semaine
+Monat	mois
+Jahr	an, année
+Minute	minute
+Sekunde	seconde
+Uhr	heure, montre
+Montag	lundi
+Dienstag	mardi
+Mittwoch	mercredi
+Donnerstag	jeudi
+Freitag	vendredi
+Samstag	samedi
+Sonntag	dimanche
+Frühling	printemps
+Sommer	été
+Herbst	automne
+Winter	hiver
+Ferien	vacances
+Urlaub	vacances
+Geburtstag	anniversaire
+Fest	fête
+Geschenk	cadeau
+Spiel	jeu
+Ball	balle, ballon
+Sport	sport
+Musik	musique
+Lied	chanson
+Film	film
+Arbeit	travail
+Beruf	métier
+Geld	argent
+Preis	prix
+Hilfe	aide
+Leben	vie
+Tod	mort
+Liebe	amour
+Glück	bonheur, chance
+Angst	peur
+Freude	joie
+Hunger	faim
+Durst	soif
+Krieg	guerre
+Frieden	paix
+Kampf	combat
+Sieg	victoire
+Feind	ennemi
+Gott	Dieu
+Burg	château fort
+Schloss	château
+Reich	empire
+Volk	peuple
+Teil	partie
+Seite	côté, page
+Ende	fin
+Anfang	début
+Ding	chose
+Sache	chose
+Idee	idée
+Problem	problème
+Grund	raison
+Art	sorte, manière
+Mal	fois
+Farbe	couleur
+Größe	taille
+Form	forme
+Nummer	numéro
+Zahl	nombre
+Hälfte	moitié
+gut	bon, bien
+schlecht	mauvais
+groß	grand
+klein	petit
+lang	long
+kurz	court
+hoch	haut
+tief	profond
+breit	large
+schmal	étroit
+dick	gros, épais
+dünn	mince
+alt	vieux
+jung	jeune
+neu	nouveau
+schön	beau
+hässlich	laid
+hübsch	joli
+stark	fort
+schwach	faible
+schnell	rapide
+langsam	lent
+leicht	facile, léger
+schwer	difficile, lourd
+einfach	simple
+richtig	juste, correct
+falsch	faux
+wichtig	important
+interessant	intéressant
+langweilig	ennuyeux
+lustig	drôle
+traurig	triste
+froh	content
+glücklich	heureux
+müde	fatigué
+krank	malade
+gesund	en bonne santé
+hungrig	affamé
+durstig	assoiffé
+warm	chaud, tiède
+heiß	chaud
+kalt	froid
+kühl	frais
+hell	clair
+dunkel	sombre
+laut	bruyant, fort
+leise	doux, silencieux
+voll	plein
+leer	vide
+reich	riche
+arm	pauvre
+teuer	cher
+billig	bon marché
+frei	libre
+fertig	prêt, fini
+bereit	prêt
+nett	gentil
+freundlich	aimable
+böse	méchant
+lieb	gentil, cher
+klug	intelligent
+dumm	bête
+mutig	courageux
+fleißig	travailleur
+faul	paresseux
+ruhig	calme
+wild	sauvage
+weit	loin, vaste
+nah	proche
+fern	lointain
+ander	autre
+gleich	même, égal
+eigen	propre
+letzt	dernier
+nächst	prochain
+erst	premier
+ganz	entier
+halb	demi
+rot	rouge
+blau	bleu
+grün	vert
+gelb	jaune
+schwarz	noir
+weiß	blanc
+grau	gris
+braun	brun
+deutsch	allemand
+französisch	français
+lateinisch	latin
+englisch	anglais
+Deutschland	Allemagne
+Frankreich	France
+Schweiz	Suisse
+Österreich	Autriche
+Rom	Rome
+Europa	Europe

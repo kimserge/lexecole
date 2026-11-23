@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>LexEcôle — Outil utile</title>
+<meta name="description" content="LexEcôle : analyse de mots et de phrases latines et allemandes, vérification de la traduction.">
+<meta name="theme-color" content="#7a1f1f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+:root{--red:#c0262d;--ink:#1d1d1f;--mut:#6b6b70;--line:#e4e1da;--bg:#faf8f4;--card:#fff;--acc:#7a1f1f;--ok:#2e7d32;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 var(--serif)}
+.wrap{max-width:760px;margin:0 auto;padding:18px 16px 40px}
+header{text-align:center;margin:6px 0 14px}
+h1{font:600 40px/1.1 var(--serif);margin:0;letter-spacing:.5px;color:var(--acc)}
+h1 span{font-style:italic}
+.sub{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:8px;font:14px var(--sans);color:var(--mut)}
+.sub select{font:14px var(--sans);border:1px solid var(--line);border-radius:8px;padding:4px 6px;background:#fff;color:var(--ink)}
+.tag{font-style:italic;font-family:var(--serif);font-size:16px;color:var(--ink)}
+.seg{display:flex;margin:14px auto 18px;max-width:360px;border:1.5px solid var(--acc);border-radius:12px;overflow:hidden}
+.seg button{flex:1;border:0;background:#fff;color:var(--acc);font:600 16px var(--sans);padding:11px 0;cursor:pointer}
+.seg button.on{background:var(--acc);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 14px 12px;margin:0 0 14px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.card h2{font:600 13px var(--sans);text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin:0 0 10px;display:flex;gap:8px;align-items:center}
+.card h2 b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--acc);color:#fff;font-size:12px;letter-spacing:0}
+textarea{width:100%;min-height:74px;resize:vertical;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:18px/1.4 var(--serif);color:var(--ink);background:#fffdf9}
+textarea:focus{outline:2px solid rgba(122,31,31,.25);border-color:var(--acc)}
+.hint{font:13px var(--sans);color:var(--mut);margin:6px 2px 0}
+.err{font:13px var(--sans);color:var(--red);margin:6px 2px 0;min-height:0}
+.row{display:flex;justify-content:flex-end;margin-top:10px}
+.btn{border:0;background:var(--acc);color:#fff;font:600 15px var(--sans);padding:10px 18px;border-radius:10px;cursor:pointer}
+.btn:disabled{opacity:.45}
+.btn.ghost{background:#fff;color:var(--acc);border:1.5px solid var(--acc)}
+/* analysis */
+.ana{display:flex;flex-wrap:wrap;gap:16px 14px;align-items:flex-end;padding:4px 0 2px}
+.w{display:flex;flex-direction:column;align-items:center;text-align:center;max-width:150px}
+.w .a{font:12px/1.25 var(--sans);color:var(--red);margin-bottom:4px}
+.w .a .p{font-weight:600}
+.w .a .g{font-style:normal;color:var(--red)}
+.w .f{font:22px/1.2 var(--serif);border-bottom:1px dotted transparent;padding:0 2px}
+.w.amb .f{border-bottom-color:var(--mut)}
+.w .n{font:10px var(--sans);color:var(--mut);margin-top:2px;min-height:12px}
+.w.unk .a{color:var(--mut)}
+.alts{margin:4px 0 0;padding:0;list-style:none}
+.alts li{padding:8px 0;border-top:1px solid var(--line);font:14px/1.35 var(--sans);color:var(--red)}
+.alts li b{color:var(--ink);font-family:var(--serif);font-size:18px;font-weight:600;margin-right:6px}
+.one{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.one .ana{flex:0 0 auto}
+.tb{flex:1 1 180px;min-width:170px;border:1px solid var(--line);border-radius:10px;overflow:hidden;font:13px/1.3 var(--sans)}
+.tb .th{background:#f4efe6;color:var(--acc);font-weight:600;padding:6px 9px;font-size:12.5px}
+.tb table{width:100%;border-collapse:collapse}
+.tb td{white-space:nowrap;padding:4px 8px;border-top:1px solid var(--line);font-family:var(--serif);font-size:15px}
+.tb td.l{font:600 11.5px var(--sans);color:var(--red);white-space:nowrap;width:1%;padding-right:4px}
+.tb td.cur{background:#fbe9e7;font-weight:600}
+.dic{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+.dch{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.dch button{border:1px solid var(--line);background:#fff;border-radius:16px;padding:4px 11px;font:600 12.5px var(--sans);color:var(--mut);cursor:pointer}
+.dch button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.dbody{max-height:380px;overflow:auto;font:15px/1.45 var(--serif)}
+.dbody .de{margin:0 0 12px}
+.dbody .hw{font:600 17px var(--serif);color:var(--acc);margin-bottom:2px}
+.dbody .gr{font:italic 13px var(--sans);color:#2b5ea7}
+.dbody .ex{color:var(--mut);border-left:2px solid var(--line);padding-left:8px;margin:2px 0}
+.dbody .gy{color:var(--mut)}
+.dbody .none{font:13px var(--sans);color:var(--mut)}
+.dbody .src{font:11px var(--sans);color:var(--mut);margin-top:4px}
+.prog{font:italic 18px/1.4 var(--serif);color:var(--mut)}
+/* correction */
+.cmp{display:flex;flex-wrap:wrap;gap:10px 8px;align-items:flex-end}
+.c{display:flex;flex-direction:column;align-items:center;text-align:center}
+.c .fx{font:600 15px/1.2 var(--sans);color:var(--red);min-height:18px}
+.c .why{font:10.5px/1.2 var(--sans);color:var(--red);opacity:.85;max-width:120px;min-height:13px}
+.c .u{font:20px/1.25 var(--serif);padding:0 2px}
+.c.bad .u{text-decoration:underline;text-decoration-color:var(--red);text-decoration-thickness:2px;text-underline-offset:4px}
+.c.extra .u{text-decoration-style:dotted}
+.c.miss .u{color:var(--red)}
+.c.ok .u{color:var(--ok)}
+.c.syn .u{color:var(--ok);border-bottom:1px dashed var(--ok)}
+.c .pg{font:15px/1.2 var(--serif);color:var(--mut);border-top:1px solid var(--line);margin-top:4px;padding-top:3px;min-width:16px;min-height:19px}
+.legend{font:12px var(--sans);color:var(--mut);margin-top:10px;line-height:1.5}
+.score{font:600 14px var(--sans);margin:0 0 10px}
+.score.good{color:var(--ok)}.score.bad{color:var(--red)}
+.hidden{display:none}
+footer{font:12px/1.5 var(--sans);color:var(--mut);text-align:center;margin-top:22px}
+.abbr{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px 6px;margin:0 0 14px}
+.abbr h3{font:600 12px var(--sans);text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin:0 0 8px}
+.abbr .grp{display:flex;flex-wrap:wrap;gap:6px 6px;margin-bottom:10px}
+.abbr .grp>span{font:11px var(--sans);color:var(--mut);width:100%;margin-bottom:1px}
+.abbr i{font-style:normal;display:inline-flex;align-items:baseline;gap:5px;border:1px solid var(--line);border-radius:7px;padding:2px 7px;font:12px var(--sans);color:var(--ink);background:#fffdf9}
+.abbr i b{color:var(--red);font-weight:700;min-width:12px;text-align:center}
+footer a{color:var(--mut)}
+.dat{margin-bottom:6px}.dat summary{cursor:pointer;display:inline-block;font:600 12.5px var(--sans);color:var(--acc);list-style:none;border:1px solid var(--line);border-radius:14px;padding:3px 12px;background:#fff}.dat summary::-webkit-details-marker{display:none}.dat ul{list-style:none;padding:0;margin:8px auto 4px;max-width:520px;text-align:left}.dat li{padding:4px 0;border-top:1px solid var(--line)}
+.load{font:13px var(--sans);color:var(--mut)}
+@media(max-width:420px){h1{font-size:34px}.w{max-width:120px}.w .f{font-size:20px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Lex<span>Ecôle</span></h1>
+  <div class="sub"><select id="ui" aria-label="Langue"><option value="fr">FR</option><option value="de">DE</option><option value="en">EN</option><option value="ru">RU</option></select><span class="tag" id="tagline">Outil utile</span></div>
+</header>
+<div class="seg" role="tablist"><button id="bla" class="on" data-l="la">Latin</button><button id="bde" data-l="de">Deutsch</button></div>
+
+<section class="card" id="c1">
+  <h2><b>1</b><span data-i="t1"></span></h2>
+  <textarea id="src" spellcheck="false" autocapitalize="sentences" autocomplete="off"></textarea>
+  <div class="hint" data-i="h1"></div>
+  <div class="err" id="e1"></div>
+  <div class="row"><button class="btn" id="go" data-i="go"></button></div>
+</section>
+
+<section class="card hidden" id="c2">
+  <h2><b>2</b><span data-i="t2"></span></h2>
+  <div class="one" id="one"><div class="ana" id="ana"></div><div class="tb hidden" id="tb"></div></div>
+  <ul class="alts hidden" id="alts"></ul>
+  <div class="dic hidden" id="dic"><div class="dch" id="dch"></div><div class="dbody" id="dbody"></div></div>
+  <div class="row"><button class="btn ghost" id="chk" data-i="chk"></button></div>
+</section>
+
+<section class="card hidden" id="c3">
+  <h2><b>3</b><span data-i="t3"></span></h2>
+  <textarea id="usr" autocomplete="off"></textarea>
+  <div class="err" id="e3"></div>
+  <div class="row"><button class="btn" id="cmpb" data-i="cmp"></button></div>
+</section>
+
+<section class="card hidden" id="c4">
+  <h2><b>4</b><span data-i="t4"></span></h2>
+  <div class="score" id="score"></div>
+  <div class="cmp" id="cmp"></div>
+  <div style="margin-top:12px"><div class="hint" data-i="progl"></div><div class="prog" id="prog"></div></div>
+</section>
+
+<section class="abbr" id="abbr"></section>
+<footer><details class="dat"><summary data-i="src"></summary><ul>
+<li><a href="https://github.com/biblissima/collatinus">Collatinus</a> — Yves Ouvrard, Philippe Verkerk (GPL)</li>
+<li><a href="https://github.com/languagetool-org/german-pos-dict">LanguageTool, german-pos-dict</a> (CC BY-SA 4.0)</li>
+<li>Lebaigue, Quicherat, <i>Dictionnaire latin–français</i> — LexEikôn</li>
+<li>FreeDict Latein–Deutsch — LexEikôn (GPL)</li>
+<li>W. Whitaker, <i>Words</i> (Latin–English) — LexEikôn</li>
+<li>Тананушко, <i>Латинско-русский словарь</i> — LexEikôn</li>
+<li><span data-i="own"></span></li></ul></details>
+<div>LexEcôle · Sergey Kim · v0.9</div></footer>
+</div>
+<script src="fr.js"></script>
+<script src="la.js"></script>
+<script src="de.js"></script>
+<script src="cmp.js"></script>
+<script>
+'use strict';
+const I18N={
+ fr:{nodic:'Pas d’article dans ce dictionnaire.',tag:'Outil utile',t1:'Écris un mot ou une phrase',h1:'Un mot : sans point. Une phrase : termine-la par un point.',go:'Analyser',t2:'Analyse',h2:'Touche un mot pour voir les autres analyses possibles.',chk:'Vérifier ta traduction',t3:'Vérifie ta traduction',ph3:'Écris ici ta traduction en français…',cmp:'Comparer',t4:'Correction',leg:'En haut, en rouge : la correction. Au milieu : ta traduction (barré = à corriger). En bas, en gris : la traduction du programme.',progl:'Traduction du programme (brouillon automatique) :',
+  ph1:{la:'Puella rosam amat.',de:'Der Hund spielt im Garten.'},needDot:'Une phrase doit se terminer par un point.',noDot:'Un mot s’écrit sans point.',empty:'Écris d’abord un mot ou une phrase.',unk:'mot inconnu',loading:'Chargement du dictionnaire…',allOk:'Bravo ! Ta traduction correspond.',nErr:n=>n+(n>1?' points à revoir':' point à revoir'),src:'Données',own:'glossaire allemand–français LexEcôle',emptyU:'Écris d’abord ta traduction.'},
+ de:{nodic:'Kein Eintrag in diesem Wörterbuch.',tag:'Nützliches Werkzeug',t1:'Gib ein Wort oder einen Satz ein',h1:'Ein Wort: ohne Punkt. Ein Satz: mit einem Punkt am Ende.',go:'Analysieren',t2:'Analyse',h2:'Tippe auf ein Wort, um weitere mögliche Analysen zu sehen.',chk:'Deine Übersetzung prüfen',t3:'Prüfe deine Übersetzung',ph3:'Schreibe hier deine französische Übersetzung…',cmp:'Vergleichen',t4:'Korrektur',leg:'Oben in Rot: die Korrektur. In der Mitte: deine Übersetzung (durchgestrichen = falsch). Unten in Grau: die Übersetzung des Programms.',progl:'Übersetzung des Programms (automatischer Entwurf):',
+  ph1:{la:'Puella rosam amat.',de:'Der Hund spielt im Garten.'},needDot:'Ein Satz muss mit einem Punkt enden.',noDot:'Ein Wort schreibt man ohne Punkt.',empty:'Gib zuerst ein Wort oder einen Satz ein.',unk:'unbekanntes Wort',loading:'Wörterbuch wird geladen…',allOk:'Bravo! Deine Übersetzung stimmt.',nErr:n=>n+(n>1?' Stellen prüfen':' Stelle prüfen'),src:'Daten',own:'Glossar Deutsch–Französisch LexEcôle',emptyU:'Schreibe zuerst deine Übersetzung.'},
+ en:{nodic:'No entry in this dictionary.',tag:'A useful tool',t1:'Type a word or a sentence',h1:'A word: no full stop. A sentence: end it with a full stop.',go:'Analyse',t2:'Analysis',h2:'Tap a word to see the other possible analyses.',chk:'Check your translation',t3:'Check your translation',ph3:'Type your French translation here…',cmp:'Compare',t4:'Correction',leg:'Top, in red: the correction. Middle: your translation (struck out = to fix). Bottom, in grey: the program’s translation.',progl:'Program translation (automatic draft):',
+  ph1:{la:'Puella rosam amat.',de:'Der Hund spielt im Garten.'},needDot:'A sentence must end with a full stop.',noDot:'A single word is written without a full stop.',empty:'Type a word or a sentence first.',unk:'unknown word',loading:'Loading the dictionary…',allOk:'Well done! Your translation matches.',nErr:n=>n+(n>1?' points to check':' point to check'),src:'Data',own:'LexEcôle German–French glossary',emptyU:'Type your translation first.'},
+ ru:{nodic:'В этом словаре статьи нет.',tag:'Полезный инструмент',t1:'Введи слово или фразу',h1:'Слово — без точки. Фраза — обязательно с точкой.',go:'Анализировать',t2:'Анализ',h2:'Нажми на слово, чтобы увидеть другие возможные разборы.',chk:'Проверить твой перевод',t3:'Проверь свой перевод',ph3:'Напиши здесь перевод на французский…',cmp:'Сравнить',t4:'Исправления',leg:'Сверху красным — исправление. В середине — твой перевод (зачёркнуто — ошибка). Снизу серым — перевод программы.',progl:'Перевод программы (автоматический черновик):',
+  ph1:{la:'Puella rosam amat.',de:'Der Hund spielt im Garten.'},needDot:'Фраза должна заканчиваться точкой.',noDot:'Слово пишется без точки.',empty:'Сначала введи слово или фразу.',unk:'неизвестное слово',loading:'Загрузка словаря…',allOk:'Браво! Перевод совпадает.',nErr:n=>n+' '+(n===1?'место проверить':'места проверить'),src:'Данные',own:'немецко-французский глоссарий LexEcôle',emptyU:'Сначала напиши перевод.'}};
+const $=s=>document.querySelector(s);
+const LS={get(k,d){try{const v=localStorage.getItem('lxe_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('lxe_'+k,JSON.stringify(v))}catch(e){}}};
+let UI=LS.get('ui','fr');if(!I18N[UI])UI='fr';let LG=LS.get('lg','la');
+const ENG={la:LA,de:DE};const loaded={};let toks=[],endP='.',single=false;
+function t(k){return I18N[UI][k]}
+const LEG={
+ fr:{h:'Abréviations',g:['Nature','Cas','Nombre · genre','Temps','Mode · voix','Autres'],c:{'nom subst':'nom',verb:'verbe','nom adj':'adjectif',adv:'adverbe',pron:'pronom',prep:'préposition',conj:'conjonction',art:'article',intrj:'interjection',num:'numéral',part:'particule','verb aux':'verbe auxiliaire','verb mod':'verbe modal',N:'nominatif',G:'génitif',D:'datif',Ac:'accusatif',Ab:'ablatif',V:'vocatif',L:'locatif',sg:'singulier',pl:'pluriel',m:'masculin',f:'féminin',nt:'neutre','1 2 3':'personne','Prés':'présent','Impf':'imparfait','Fut':'futur',Pf:'parfait','Pqpf':'plus-que-parfait','FutAnt':'futur antérieur','Prét':'prétérit',Sj:'subjonctif',Ip:'impératif',If:'infinitif',Pa:'participe',Gd:'gérondif',Su:'supin',Gv:'adjectif verbal',K1:'subjonctif I',K2:'subjonctif II',ps:'passif',d:'déponent','1–5':'déclinaison / conjugaison',cp:'comparatif',sp:'superlatif',dé:'défini',id:'indéfini',pe:'personnel',po:'possessif',dm:'démonstratif',ré:'réfléchi',it:'interrogatif',rl:'relatif',sé:'séparable','3m':'3e mixte',iv:'invariable'}},
+ de:{h:'Abkürzungen',g:['Wortart','Fall','Zahl · Geschlecht','Zeit','Modus · Genus verbi','Sonstiges'],c:{'nom subst':'Nomen',verb:'Verb','nom adj':'Adjektiv',adv:'Adverb',pron:'Pronomen',prep:'Präposition',conj:'Konjunktion',art:'Artikel',intrj:'Interjektion',num:'Zahlwort',part:'Verbzusatz','verb aux':'Hilfsverb','verb mod':'Modalverb',N:'Nominativ',G:'Genitiv',D:'Dativ',Ac:'Akkusativ',Ab:'Ablativ',V:'Vokativ',L:'Lokativ',sg:'Singular',pl:'Plural',m:'maskulin',f:'feminin',nt:'neutrum','1 2 3':'Person','Prés':'Präsens','Impf':'Imperfekt','Fut':'Futur',Pf:'Perfekt','Pqpf':'Plusquamperfekt','FutAnt':'Futur II','Prét':'Präteritum',Sj:'Konjunktiv',Ip:'Imperativ',If:'Infinitiv',Pa:'Partizip',Gd:'Gerundium',Su:'Supinum',Gv:'Gerundivum',K1:'Konjunktiv I',K2:'Konjunktiv II',ps:'Passiv',d:'Deponens','1–5':'Deklination / Konjugation',cp:'Komparativ',sp:'Superlativ',dé:'bestimmt',id:'unbestimmt',pe:'Personal-',po:'Possessiv-',dm:'Demonstrativ-',ré:'Reflexiv-',it:'Interrogativ-',rl:'Relativ-',sé:'trennbar','3m':'3. gemischte',iv:'unveränderlich'}},
+ en:{h:'Abbreviations',g:['Part of speech','Case','Number · gender','Tense','Mood · voice','Other'],c:{'nom subst':'noun',verb:'verb','nom adj':'adjective',adv:'adverb',pron:'pronoun',prep:'preposition',conj:'conjunction',art:'article',intrj:'interjection',num:'numeral',part:'verb particle','verb aux':'auxiliary','verb mod':'modal verb',N:'nominative',G:'genitive',D:'dative',Ac:'accusative',Ab:'ablative',V:'vocative',L:'locative',sg:'singular',pl:'plural',m:'masculine',f:'feminine',nt:'neuter','1 2 3':'person','Prés':'present','Impf':'imperfect','Fut':'future',Pf:'perfect','Pqpf':'pluperfect','FutAnt':'future perfect','Prét':'preterite',Sj:'subjunctive',Ip:'imperative',If:'infinitive',Pa:'participle',Gd:'gerund',Su:'supine',Gv:'gerundive',K1:'subjunctive I',K2:'subjunctive II',ps:'passive',d:'deponent','1–5':'declension / conjugation',cp:'comparative',sp:'superlative',dé:'definite',id:'indefinite',pe:'personal',po:'possessive',dm:'demonstrative',ré:'reflexive',it:'interrogative',rl:'relative',sé:'separable','3m':'3rd -io',iv:'indeclinable'}},
+ ru:{h:'Сокращения',g:['Часть речи','Падеж','Число · род','Время','Наклонение · залог','Прочее'],c:{'nom subst':'существительное',verb:'глагол','nom adj':'прилагательное',adv:'наречие',pron:'местоимение',prep:'предлог',conj:'союз',art:'артикль',intrj:'междометие',num:'числительное',part:'отделяемая приставка','verb aux':'вспомогательный глагол','verb mod':'модальный глагол',N:'именительный',G:'родительный',D:'дательный',Ac:'винительный',Ab:'аблатив',V:'звательный',L:'локатив',sg:'единственное',pl:'множественное',m:'мужской',f:'женский',nt:'средний','1 2 3':'лицо','Prés':'настоящее','Impf':'имперфект','Fut':'будущее',Pf:'перфект','Pqpf':'плюсквамперфект','FutAnt':'будущее II','Prét':'претерит',Sj:'конъюнктив',Ip:'повелительное',If:'инфинитив',Pa:'причастие',Gd:'герундий',Su:'супин',Gv:'герундив',K1:'конъюнктив I',K2:'конъюнктив II',ps:'страдательный',d:'отложительный','1–5':'склонение / спряжение',cp:'сравнительная',sp:'превосходная',dé:'определённый',id:'неопределённый',pe:'личное',po:'притяжательное',dm:'указательное',ré:'возвратное',it:'вопросительное',rl:'относительное',sé:'отделяемый','3m':'3-е смешанное',iv:'неизменяемое'}}};
+const LEGSET={la:[['nom subst','verb','nom adj','adv','pron','prep','conj','intrj'],['N','G','D','Ac','Ab','V','L'],['sg','pl','m','f','nt','1 2 3'],['Prés','Impf','Fut','Pf','Pqpf','FutAnt'],['Sj','Ip','If','Pa','Gd','Gv','Su','ps'],['1–5','3m','d','cp','sp']],
+ de:[['nom subst','verb','verb aux','verb mod','nom adj','adv','art','pron','prep','conj','part','num'],['N','G','D','Ac'],['sg','pl','m','f','nt','1 2 3'],['Prés','Prét'],['K1','K2','Ip','If','Pa'],['dé','id','pe','po','dm','ré','it','rl','sé','cp','sp']]};
+function renderLeg(){const L=LEG[UI]||LEG.fr;$('#abbr').innerHTML='<h3>'+L.h+'</h3>'+LEGSET[LG].map((g,k)=>'<div class="grp"><span>'+L.g[k]+'</span>'+g.map(c=>'<i><b>'+c+'</b>'+esc(L.c[c]||'')+'</i>').join('')+'</div>').join('')}
+function applyUI(){document.documentElement.lang=UI;$('#ui').value=UI;$('#tagline').textContent=t('tag');document.title='LexEcôle — '+t('tag');
+  document.querySelectorAll('[data-i]').forEach(e=>{const v=t(e.dataset.i);if(typeof v==='string')e.textContent=v});
+  $('#src').placeholder=t('ph1')[LG];$('#usr').placeholder=t('ph3');
+  document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.l===LG));$('#bde').textContent=UI==='fr'?'Allemand':UI==='en'?'German':UI==='ru'?'Немецкий':'Deutsch';$('#bla').textContent=UI==='ru'?'Латынь':UI==='de'?'Latein':'Latin';
+  renderLeg();if(toks.length)renderAna()}
+async function ensure(l){if(loaded[l])return loaded[l];$('#e1').textContent='';const st=$('#e1');st.className='load';st.textContent=t('loading');
+  loaded[l]=(async()=>{if(!FR._fem){const f=await (await fetch('frfem.txt')).text();FR.setFem(f.split(/\s+/));FR._fem=true}const d=await (await fetch('data/'+l+'.json')).json();ENG[l].load(d);st.textContent='';st.className='err';return true})();return loaded[l]}
+function reset(from){if(from<=2){$('#c2').classList.add('hidden')}if(from<=3){$('#c3').classList.add('hidden')}$('#c4').classList.add('hidden')}
+$('.seg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.dataset.l===LG)return;LG=b.dataset.l;LS.set('lg',LG);toks=[];reset(2);applyUI();ensure(LG)});
+$('#ui').addEventListener('change',e=>{UI=e.target.value;LS.set('ui',UI);applyUI()});
+function words(s){return s.trim().replace(/[.!?;]+$/,'').split(/[\s,;:]+/).map(w=>w.replace(/^[«"(]+|[»")]+$/g,'')).filter(Boolean)}
+$('#go').addEventListener('click',async()=>{const s=$('#src').value.trim(),e=$('#e1');e.className='err';e.textContent='';
+  if(!s){e.textContent=t('empty');return}
+  const ws=words(s);single=ws.length===1;
+  if(single&&/[.!?]$/.test(s)){e.textContent=t('noDot');return}
+  if(!single&&!/[.!?]$/.test(s)){e.textContent=t('needDot');return}
+  endP=single?'':s.slice(-1);
+  await ensure(LG);const E=ENG[LG];
+  toks=ws.map((w,i)=>{const r=E.analyze(w,i===0);return {w,i,a:r.a,enc:r.enc,sel:0}});
+  E.choose(toks);toks.forEach(x=>{x.auto=x.c;x.order=orderAlts(x)});
+  reset(3);renderAna();$('#c2').classList.remove('hidden');$('#c2').scrollIntoView({behavior:'smooth',block:'start'})});
+function orderAlts(x){if(!x.a.length)return [];const seen=new Set(),out=[];const E=ENG[LG];
+  for(const y of [x.c,...x.a.slice().sort((a,b)=>((b.base||0)+(b.bonus||0))-((a.base||0)+(a.bonus||0)))]){const L=E.label(y,UI,x.w).join('|');if(seen.has(L))continue;seen.add(L);out.push(y)}return out}
+function lab(x,y){const L=ENG[LG].label(y,UI,x.w);return `<span class="p">${esc(L[0])}</span>${L[1]?'<br>'+esc(L[1]):''}${L[2]?'<br><span class="g">«'+esc(L[2])+'»</span>':''}`}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+/* LexEikôn dictionaries for single words */
+const LXD='/lexeikon/data/';
+const DICTS={la:[{id:'lafr',l:'fr',sig:'Lebaigue–Quicherat',full:'Lebaigue, Quicherat, Dictionnaire latin–français'},{id:'lade',l:'de',sig:'FreeDict',full:'FreeDict Latein–Deutsch'},{id:'laen',l:'en',sig:'Whitaker',full:'William Whitaker, Latin–English (Words)'},{id:'la',l:'ru',sig:'Тананушко',full:'Тананушко, Латинско-русский словарь'}],de:[]};
+const dcache={};let dsel=null;
+const dnorm=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/j/g,'i').replace(/v/g,'u').replace(/[^a-z]/g,'');
+function loadDict(id){if(dcache[id])return dcache[id];return dcache[id]=fetch(LXD+id+'.json').then(r=>r.json()).then(d=>{const m=new Map();for(const e of d.entries){const k=dnorm(e[0]);if(!m.has(k))m.set(k,[]);m.get(k).push(e)}return m}).catch(()=>{delete dcache[id];return null})}
+function fmtDef(t){return esc(t).replace(/\x02/g,'<span class="gr">').replace(/\x03/g,'</span>').replace(/\x04/g,'<div class="ex">').replace(/\x05/g,'</div>').replace(/\x06/g,'<i>').replace(/\x07/g,'</i>').replace(/\x0b/g,'<span class="gy">').replace(/\x0c/g,'</span>').replace(/[\x00-\x08\x0e-\x1f\ue000-\uf8ff]/g,'').replace(/\n/g,'<br>').replace(/(<br>)?<div/g,'<div').replace(/<\/div><br>/g,'</div>')}
+async function renderDic(){const box=$('#dic'),L=DICTS[LG]||[];const x=toks[0];
+  if(!single||!x||!L.length||!x.order.length){box.classList.add('hidden');return}
+  box.classList.remove('hidden');dsel=(L.find(d=>d.l===UI)||L[0]).id;$('#dch').innerHTML='';
+  const keys=[...new Set(x.order.map(y=>dnorm(y.lem.replace(/\d+$/,''))))];const body=$('#dbody');body.innerHTML='<div class="none">'+esc(t('loading'))+'</div>';
+  const id=dsel,m=await loadDict(id);if(id!==dsel)return;
+  if(!m){body.innerHTML='<div class="none">—</div>';return}
+  const out=[];for(const k of keys)for(const e of m.get(k)||[])out.push(`<div class="de"><div class="hw">${esc(e[0])}</div>${fmtDef(e[1])}</div>`);
+  body.innerHTML=out.length?out.join(''):'<div class="none">'+esc(t('nodic'))+'</div>'}
+$('#dch').addEventListener('click',e=>{const b=e.target.closest('button[data-d]');if(!b)return;dsel=b.dataset.d;renderDic()});
+function renderTb(){const b=$('#tb'),x=toks[0];const T=single&&x&&x.c?ENG[LG].table(x.c,UI):null;if(!T){b.classList.add('hidden');b.innerHTML='';return}
+  b.classList.remove('hidden');const cur=(x.c.f&&ENG[LG]===LA)?LA.label(x.c)[1]:'';
+  const cc=(i,k)=>T.cur&&T.cur[0]===i&&T.cur[1]===k?'cur':'';b.innerHTML=`<div class="th">${esc(T.title)}</div><table>${T.rows.map((r,i)=>`<tr><td class="l">${esc(r[0])} ${T.cols[0]}</td><td class="${cc(i,1)}">${esc(r[1])}</td><td class="l">${esc(r[0])} ${T.cols[1]}</td><td class="${cc(i,2)}">${esc(r[2])}</td></tr>`).join('')}</table>`}
+function isCur(x,cell){const w=x.w.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/j/g,'i').replace(/v/g,'u');return cell.split(', ').some(c=>{c=c.toLowerCase().replace(/^(der|die|das|den|dem|des) /,'');return c.startsWith('-')?w.endsWith(c.slice(1)):(c===w||c===x.w.toLowerCase())})}
+function renderAna(){const A=$('#ana'),al=$('#alts');
+  A.innerHTML=toks.map((x,i)=>{if(!x.c)return `<div class="w unk"><div class="a"><span class="p">?</span><br>${esc(t('unk'))}</div><div class="f">${esc(x.w)}</div></div>`;
+    const n=x.order.length;return `<div class="w"><div class="a">${lab(x,x.c)}</div><div class="f">${esc(x.w)}${x.enc?'<span style="color:var(--mut)">-'+x.enc+'</span>':''}</div></div>`}).join('');
+  if(false){al.classList.remove('hidden');al.innerHTML=toks[0].order.map(y=>`<li><b>${esc(toks[0].w)}</b>${lab(toks[0],y).replace(/<br>/g,' · ')}</li>`).join('')}else{al.classList.add('hidden');al.innerHTML=''}
+  $('#chk').parentElement.classList.toggle('hidden',single);renderDic();renderTb()}
+$('#chk').addEventListener('click',()=>{$('#c3').classList.remove('hidden');$('#usr').focus();$('#c3').scrollIntoView({behavior:'smooth',block:'start'})});
+function doCompare(){const u=$('#usr').value.trim(),e=$('#e3');e.textContent='';if(!u){e.textContent=t('emptyU');return}
+  const E=ENG[LG];const prog=E.translate(toks,endP);
+  const src=toks.filter(x=>x.c).map(x=>({w:x.w,label:E.label(x.c,UI,x.w),exp:E.expect(x),kind:x.c.pos}));
+  const r=CMP.compare(u,prog,src,UI,LG==='la');
+  $('#score').className='score '+(r.errors?'bad':'good');$('#score').textContent=r.errors?t('nErr')(r.errors):t('allOk');
+  $('#cmp').innerHTML=r.cols.map(c=>{const cls=c.ok?(c.syn?'syn':'ok'):c.missing?'miss':'bad';
+    return `<div class="c ${cls}${c.extra?' extra':''}"><div class="fx">${c.fix&&!c.ok?esc(c.fix):''}</div><div class="why">${!c.ok&&c.why?esc(c.why):''}</div><div class="u">${c.u?esc(c.u):(c.missing?'‸':'')}</div><div class="pg">${c.p?esc(c.p):''}</div></div>`}).join('');
+  $('#prog').textContent=prog;$('#c4').classList.remove('hidden');$('#c4').scrollIntoView({behavior:'smooth',block:'start'})}
+$('#cmpb').addEventListener('click',doCompare);
+$('#src').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#go').click()}});
+applyUI();ensure(LG);
+</script>
+</body>
+</html>
